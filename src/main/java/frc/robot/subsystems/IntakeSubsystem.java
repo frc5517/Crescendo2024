@@ -28,7 +28,7 @@ public class IntakeSubsystem extends SubsystemBase {
   @Override
   public void periodic() {}
 
-  public Command IntakeCommand(Double speed, Boolean Intake)
+  public Command IntakeCommand(Double speed)
   {
     return run(() -> {
       if (noteSensor.get() == false) {

@@ -7,6 +7,9 @@ package frc.robot;
 import java.io.File;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
@@ -19,13 +22,18 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.swervedrive.AbsoluteDrive;
 import frc.robot.commands.swervedrive.AbsoluteDriveAdv;
 import frc.robot.commands.swervedrive.AbsoluteFieldDrive;
+import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
 public class RobotContainer {
 
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
+  private final ArmSubsystem armbase = new ArmSubsystem();
+  private final IntakeSubsystem intakebase = new IntakeSubsystem();
 
   XboxController driverXbox = new XboxController(0);
+  XboxController operatorXbox = new XboxController(1);
 
   SendableChooser<Command> swerveChooser = new SendableChooser<>();
   SendableChooser<Command> autonChooser = new SendableChooser<>();
@@ -87,7 +95,16 @@ public class RobotContainer {
     swerveChooser.addOption("Field Direct Angle Drive", driveFieldOrientedDirectAngle);
     swerveChooser.addOption("Field Angular Velocity Drive", driveFieldOrientedAnglularVelocity); 
 
-    new JoystickButton(driverXbox, 8).toggleOnTrue(new InstantCommand(drivebase::lock));
+    new JoystickButton(driverXbox, 8).toggleOnTrue(new InstantCommand(drivebase::lock));    // Lock drive train toggle
+    new JoystickButton(driverXbox, 5).whileTrue(Commands.deferredProxy(
+        () -> drivebase.driveToPose(new Pose2d(new Translation2d(4, 4),Rotation2d.fromDegrees(0)))));
+
+    new JoystickButton(operatorXbox, 1).whileTrue(armbase.ArmCommand(-.3));       // Lower arm while held
+    new JoystickButton(operatorXbox, 3).whileTrue(armbase.ArmCommand(.3));  // Raise arm while held
+
+    new JoystickButton(operatorXbox, 5).whileTrue(intakebase.IntakeCommand(.5));                                // Intake while held
+    new JoystickButton(operatorXbox, 6).whileTrue(intakebase.ShootCommand(.7, .3, 2));  // Fast shoot for speaker while held
+    new JoystickButton(operatorXbox, 2).whileTrue(intakebase.ShootCommand(.5, .3, 0));  // Slow shoot for amp while held
 
   }
 
