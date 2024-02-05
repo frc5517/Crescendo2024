@@ -61,12 +61,12 @@ public class SwerveSubsystem extends SubsystemBase
     speedValue.setDefaultOption("4", 14.5);
 
     // Angle conversion factor is 360 / (GEAR RATIO * ENCODER RESOLUTION)
-    //  In this case the gear ratio is 12.8 motor revolutions per wheel rotation.
+    //  In this case the gear ratio is 16.8 motor revolutions per wheel rotation.
     //  The encoder resolution per motor revolution is 1 per motor revolution.
     double angleConversionFactor = SwerveMath.calculateDegreesPerSteeringRotation(16.8);
     // Motor conversion factor is (PI * WHEEL DIAMETER IN METERS) / (GEAR RATIO * ENCODER RESOLUTION).
     //  In this case the wheel diameter is 4 inches, which must be converted to meters to get meters/second.
-    //  The gear ratio is 6.75 motor revolutions per wheel rotation.
+    //  The gear ratio is 8.14 motor revolutions per wheel rotation.
     //  The encoder resolution per motor revolution is 1 per motor revolution.
     double driveConversionFactor = SwerveMath.calculateMetersPerRotation(Units.inchesToMeters(4), 8.14);
     System.out.println("\"conversionFactor\": {");
@@ -78,14 +78,14 @@ public class SwerveSubsystem extends SubsystemBase
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
     try
     {
-      // swerveDrive = new SwerveParser(directory).createSwerveDrive(maximumSpeed);
-      // Alternative method if you don't want to supply the conversion factor via JSON files.
       swerveDrive = new SwerveParser(directory).createSwerveDrive(maximumSpeed, angleConversionFactor, driveConversionFactor);
     } catch (Exception e)
     {
       throw new RuntimeException(e);
     }
     swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via angle.
+
+    // AHRS navx = (AHRS)swerveDrive.swerveDriveConfiguration.imu.getIMU();
 
     setupPathPlanner();
   }
