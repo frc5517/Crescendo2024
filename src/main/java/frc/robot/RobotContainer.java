@@ -7,9 +7,6 @@ package frc.robot;
 import java.io.File;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
@@ -25,12 +22,14 @@ import frc.robot.commands.swervedrive.AbsoluteFieldDrive;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
 
-  private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
-  private final ArmSubsystem armbase = new ArmSubsystem();
-  private final IntakeSubsystem intakebase = new IntakeSubsystem();
+  SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
+  ArmSubsystem armbase = new ArmSubsystem();
+  IntakeSubsystem intakebase = new IntakeSubsystem();
+  VisionSubsystem visionbase = new VisionSubsystem();
 
   XboxController driverXbox = new XboxController(0);
   XboxController operatorXbox = new XboxController(1);
@@ -38,6 +37,17 @@ public class RobotContainer {
   SendableChooser<Command> swerveChooser = new SendableChooser<>();
   SendableChooser<Command> autonChooser = new SendableChooser<>();
 
+  public void robotPeriodic () {
+
+    var visionEst = visionbase.getEstimatedGlobalPose();
+    visionEst.ifPresent(
+            est -> {
+                // var estPose = est.estimatedPose.toPose2d();
+
+                drivebase.addVisionMeasurement(
+                        est.estimatedPose.toPose2d(), est.timestampSeconds);
+            });
+  }
 
   public RobotContainer() {
     
@@ -96,8 +106,7 @@ public class RobotContainer {
     swerveChooser.addOption("Field Angular Velocity Drive", driveFieldOrientedAnglularVelocity); 
 
     new JoystickButton(driverXbox, 8).toggleOnTrue(new InstantCommand(drivebase::lock));    // Lock drive train toggle
-    new JoystickButton(driverXbox, 5).whileTrue(Commands.deferredProxy(
-        () -> drivebase.driveToPose(new Pose2d(new Translation2d(4, 4),Rotation2d.fromDegrees(0)))));
+    new JoystickButton(driverXbox, 5).whileTrue(drivebase.driveToPose(drivebase.poseEstimator.getEstimatedPosition())); // Drive to the note
 
     new JoystickButton(operatorXbox, 1).whileTrue(armbase.ArmCommand(-.3));       // Lower arm while held
     new JoystickButton(operatorXbox, 3).whileTrue(armbase.ArmCommand(.3));  // Raise arm while held
