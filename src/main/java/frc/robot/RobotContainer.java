@@ -42,10 +42,12 @@ public class RobotContainer {
     var visionEst = visionbase.getEstimatedGlobalPose();
     visionEst.ifPresent(
             est -> {
-                // var estPose = est.estimatedPose.toPose2d();
+                var estPose = est.estimatedPose.toPose2d();
+                // Change our trust in the measurement based on the tags we can see
+                var estStdDevs = visionbase.getEstimationStdDevs(estPose);
 
                 drivebase.addVisionMeasurement(
-                        est.estimatedPose.toPose2d(), est.timestampSeconds);
+                        est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
             });
   }
 
@@ -91,8 +93,8 @@ public class RobotContainer {
         () -> driverXbox.getRawAxis(2));
 
     Command closedDrive = drivebase.driveCommand(
-        () -> driverXbox.getLeftY(), 
-        () -> driverXbox.getLeftX(), 
+        () -> MathUtil.applyDeadband(driverXbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND),
+        () -> MathUtil.applyDeadband(driverXbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND),
         () -> driverXbox.getRightX());
 
     drivebase.setDefaultCommand(
@@ -106,7 +108,11 @@ public class RobotContainer {
     swerveChooser.addOption("Field Angular Velocity Drive", driveFieldOrientedAnglularVelocity); 
 
     new JoystickButton(driverXbox, 8).toggleOnTrue(new InstantCommand(drivebase::lock));    // Lock drive train toggle
-    new JoystickButton(driverXbox, 5).whileTrue(drivebase.driveToPose(drivebase.poseEstimator.getEstimatedPosition())); // Drive to the note
+
+    new JoystickButton(driverXbox, 5).whileTrue(drivebase.aimAtNote(visionbase.camera, 
+        () -> MathUtil.applyDeadband(driverXbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND),
+        () -> MathUtil.applyDeadband(driverXbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND),
+        () -> driverXbox.getRightX()));
 
     new JoystickButton(operatorXbox, 1).whileTrue(armbase.ArmCommand(-.3));       // Lower arm while held
     new JoystickButton(operatorXbox, 3).whileTrue(armbase.ArmCommand(.3));  // Raise arm while held

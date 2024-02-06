@@ -57,6 +57,8 @@ public final class Constants
   }
 
   public static class Vision {
+        public final static int BluePipeline = 0;
+        public final static int RedPipeline = 1;
         public static final String kCameraName = "Camera";
         // Cam mounted facing forward, half a meter forward of center, half a meter up from center.
         public static final Transform3d kRobotToCam =

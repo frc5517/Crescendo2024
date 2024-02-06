@@ -11,21 +11,27 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import java.io.File;
 import java.util.function.DoubleSupplier;
 
+import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 
 import swervelib.SwerveController;
@@ -54,6 +60,9 @@ public class SwerveSubsystem extends SubsystemBase
   public SwerveDrivePoseEstimator poseEstimator;
   public PhotonPoseEstimator photonEstimator;
 
+  final double ANGULAR_P = 0.1;
+  final double ANGULAR_D = 0.0;
+  PIDController turnController = new PIDController(ANGULAR_P, 0, ANGULAR_D);
 
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
@@ -487,8 +496,20 @@ public class SwerveSubsystem extends SubsystemBase
     return swerveDrive.getPitch();
   }
 
-  public void addVisionMeasurement(Pose2d visionMeasurement, double timestampSeconds) {
-    poseEstimator.addVisionMeasurement(visionMeasurement, timestampSeconds);
-}
+  public void addVisionMeasurement(Pose2d visionMeasurement, double timestampSeconds, Matrix<N3, N1> stdDevs) {
+        poseEstimator.addVisionMeasurement(visionMeasurement, timestampSeconds, stdDevs);
+    }
+
+  public Command aimAtNote(PhotonCamera camera, DoubleSupplier vX, DoubleSupplier vY, DoubleSupplier rX) {
+    return run(() -> {
+      var result = camera.getLatestResult();
+      if (result.hasTargets()) {
+        driveCommand(vX, vX, () -> -turnController.calculate(result.getBestTarget().getYaw()));
+      }
+      else {
+        driveCommand(vX, vX, rX);
+      }
+    });
+  }
 
 }
