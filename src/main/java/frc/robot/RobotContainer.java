@@ -8,7 +8,6 @@ import java.io.File;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -59,18 +58,18 @@ public class RobotContainer {
     AbsoluteDrive closedAbsoluteDrive = new AbsoluteDrive(drivebase,
         () -> MathUtil.applyDeadband(driverXbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND), 
         () -> MathUtil.applyDeadband(driverXbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND),
-        () -> driverXbox.getRightX(),
+        () -> MathUtil.applyDeadband(driverXbox.getRightX(), OperatorConstants.RIGHT_X_DEADBAND),
         () -> driverXbox.getRightY());
 
     AbsoluteFieldDrive absoluteFieldDrive = new AbsoluteFieldDrive(drivebase, 
         () -> MathUtil.applyDeadband(driverXbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND),
         () -> MathUtil.applyDeadband(driverXbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND),
-        () -> driverXbox.getRightX());
+        () -> MathUtil.applyDeadband(driverXbox.getRightX(), OperatorConstants.RIGHT_X_DEADBAND));
 
     AbsoluteDriveAdv closedAbsoluteDriveAdv = new AbsoluteDriveAdv(drivebase, 
         () -> MathUtil.applyDeadband(driverXbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND),
         () -> MathUtil.applyDeadband(driverXbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND),
-        () -> driverXbox.getRightX(), 
+        () -> MathUtil.applyDeadband(driverXbox.getRightX(), OperatorConstants.RIGHT_X_DEADBAND), 
         driverXbox::getYButtonPressed, 
         driverXbox::getAButtonPressed, 
         driverXbox::getXButtonPressed,
@@ -79,7 +78,7 @@ public class RobotContainer {
     Command driveFieldOrientedDirectAngle = drivebase.driveCommand(
         () -> MathUtil.applyDeadband(driverXbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND),
         () -> MathUtil.applyDeadband(driverXbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND),
-        () -> driverXbox.getRightX(),
+        () -> MathUtil.applyDeadband(driverXbox.getRightX(), OperatorConstants.RIGHT_X_DEADBAND),
         () -> driverXbox.getRightY());
 
     Command driveFieldOrientedAnglularVelocity = drivebase.driveCommand(
@@ -87,18 +86,10 @@ public class RobotContainer {
         () -> MathUtil.applyDeadband(driverXbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND),
         () -> driverXbox.getRawAxis(2));
 
-    Command driveFieldOrientedDirectAngleSim = drivebase.simDriveCommand(
-        () -> MathUtil.applyDeadband(driverXbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND),
-        () -> MathUtil.applyDeadband(driverXbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND),
-        () -> driverXbox.getRawAxis(2));
-
     Command closedDrive = drivebase.driveCommand(
         () -> MathUtil.applyDeadband(driverXbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND),
         () -> MathUtil.applyDeadband(driverXbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND),
-        () -> driverXbox.getRightX());
-
-    drivebase.setDefaultCommand(
-        !RobotBase.isSimulation() ? driveFieldOrientedDirectAngle : driveFieldOrientedDirectAngleSim);
+        () -> MathUtil.applyDeadband(driverXbox.getRightX(), OperatorConstants.RIGHT_X_DEADBAND));
 
     swerveChooser.addOption("Closed Drive", closedDrive);
     swerveChooser.addOption("Closed Absolute Drive", closedAbsoluteDrive);
@@ -107,12 +98,13 @@ public class RobotContainer {
     swerveChooser.addOption("Field Direct Angle Drive", driveFieldOrientedDirectAngle);
     swerveChooser.addOption("Field Angular Velocity Drive", driveFieldOrientedAnglularVelocity); 
 
+    drivebase.setDefaultCommand(
+        swerveChooser.getSelected()
+    );
+
     new JoystickButton(driverXbox, 8).toggleOnTrue(new InstantCommand(drivebase::lock));    // Lock drive train toggle
 
-    new JoystickButton(driverXbox, 5).whileTrue(drivebase.aimAtNote(visionbase.camera, 
-        () -> MathUtil.applyDeadband(driverXbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND),
-        () -> MathUtil.applyDeadband(driverXbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND),
-        () -> driverXbox.getRightX()));
+    new JoystickButton(driverXbox, 5).whileTrue(drivebase.aimAtNote(visionbase.camera));
 
     new JoystickButton(operatorXbox, 1).whileTrue(armbase.ArmCommand(-.3));       // Lower arm while held
     new JoystickButton(operatorXbox, 3).whileTrue(armbase.ArmCommand(.3));  // Raise arm while held

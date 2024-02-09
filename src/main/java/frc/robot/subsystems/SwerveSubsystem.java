@@ -25,6 +25,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -33,6 +34,7 @@ import java.util.function.DoubleSupplier;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
@@ -55,7 +57,7 @@ public class SwerveSubsystem extends SubsystemBase
    */
   public SendableChooser<Double> speedValue = new SendableChooser<>();
 
-  public        double      maximumSpeed = Units.feetToMeters(speedValue.getSelected());
+  public double maximumSpeed;
 
   public SwerveDrivePoseEstimator poseEstimator;
   public PhotonPoseEstimator photonEstimator;
@@ -76,10 +78,11 @@ public class SwerveSubsystem extends SubsystemBase
     speedValue.addOption("3", 11.0);
     speedValue.setDefaultOption("4", 14.5);
 
+    SmartDashboard.putData(speedValue);
     // Angle conversion factor is 360 / (GEAR RATIO * ENCODER RESOLUTION)
     //  In this case the gear ratio is 16.8 motor revolutions per wheel rotation.
     //  The encoder resolution per motor revolution is 1 per motor revolution.
-    double angleConversionFactor = SwerveMath.calculateDegreesPerSteeringRotation(16.8);
+    double angleConversionFactor = SwerveMath.calculateDegreesPerSteeringRotation(21.42);
     // Motor conversion factor is (PI * WHEEL DIAMETER IN METERS) / (GEAR RATIO * ENCODER RESOLUTION).
     //  In this case the wheel diameter is 4 inches, which must be converted to meters to get meters/second.
     //  The gear ratio is 8.14 motor revolutions per wheel rotation.
@@ -305,6 +308,12 @@ public class SwerveSubsystem extends SubsystemBase
     swerveDrive.drive(velocity);
   }
 
+  public void teleopInit() {
+
+    maximumSpeed = speedValue.getSelected();
+
+  }
+
   @Override
   public void periodic()
   {
@@ -500,14 +509,12 @@ public class SwerveSubsystem extends SubsystemBase
         poseEstimator.addVisionMeasurement(visionMeasurement, timestampSeconds, stdDevs);
     }
 
-  public Command aimAtNote(PhotonCamera camera, DoubleSupplier vX, DoubleSupplier vY, DoubleSupplier rX) {
+  public Command aimAtNote(PhotonCamera camera) {
     return run(() -> {
-      var result = camera.getLatestResult();
+      PhotonPipelineResult result = camera.getLatestResult();
       if (result.hasTargets()) {
-        driveCommand(vX, vX, () -> -turnController.calculate(result.getBestTarget().getYaw()));
-      }
-      else {
-        driveCommand(vX, vX, rX);
+        drive(getTargetSpeeds(0, 0, 
+        Rotation2d.fromDegrees(result.getBestTarget().getYaw())));
       }
     });
   }
