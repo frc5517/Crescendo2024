@@ -4,11 +4,8 @@
 
 package frc.robot;
 
-<<<<<<< Updated upstream
-=======
 import com.pathplanner.lib.util.PIDConstants;
 
->>>>>>> Stashed changes
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
@@ -59,7 +56,6 @@ public final class Constants
     public static final double TURN_CONSTANT    = 6;
   }
 
-<<<<<<< Updated upstream
   public static class ManipulatorConstants
   {
     public static final int intakeMotorPort = 20;
@@ -68,8 +64,6 @@ public final class Constants
     public static final int rightArmMotorPort = 23;
   }
 
-=======
->>>>>>> Stashed changes
   public static class Vision {
         public final static int BluePipeline = 0;
         public final static int RedPipeline = 1;
@@ -87,8 +81,4 @@ public final class Constants
         public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
         public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
     }
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 }

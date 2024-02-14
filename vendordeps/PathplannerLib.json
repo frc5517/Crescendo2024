@@ -1,11 +1,7 @@
 {
     "fileName": "PathplannerLib.json",
     "name": "PathplannerLib",
-<<<<<<< Updated upstream
-    "version": "2024.2.1",
-=======
     "version": "2024.2.3",
->>>>>>> Stashed changes
     "uuid": "1b42324f-17c6-4875-8e77-1c312bc8c786",
     "frcYear": "2024",
     "mavenUrls": [
@@ -16,11 +12,7 @@
         {
             "groupId": "com.pathplanner.lib",
             "artifactId": "PathplannerLib-java",
-<<<<<<< Updated upstream
-            "version": "2024.2.1"
-=======
             "version": "2024.2.3"
->>>>>>> Stashed changes
         }
     ],
     "jniDependencies": [],
@@ -28,11 +20,7 @@
         {
             "groupId": "com.pathplanner.lib",
             "artifactId": "PathplannerLib-cpp",
-<<<<<<< Updated upstream
-            "version": "2024.2.1",
-=======
             "version": "2024.2.3",
->>>>>>> Stashed changes
             "libName": "PathplannerLib",
             "headerClassifier": "headers",
             "sharedLibrary": false,
