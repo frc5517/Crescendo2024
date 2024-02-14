@@ -6,6 +6,8 @@ package frc.robot;
 
 import java.io.File;
 
+import org.photonvision.PhotonCamera;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.XboxController;
@@ -32,6 +34,8 @@ public class RobotContainer {
 
   XboxController driverXbox = new XboxController(0);
   XboxController operatorXbox = new XboxController(1);
+
+  PhotonCamera camera = new PhotonCamera("Camera");
 
   SendableChooser<Command> swerveChooser = new SendableChooser<>();
   SendableChooser<Command> autonChooser = new SendableChooser<>();
@@ -103,6 +107,7 @@ public class RobotContainer {
     );
 
     new JoystickButton(driverXbox, 8).toggleOnTrue(new InstantCommand(drivebase::lock));    // Lock drive train toggle
+    new JoystickButton(driverXbox, 5).whileTrue(drivebase.aimAtTarget(camera));
 
     new JoystickButton(driverXbox, 5).whileTrue(drivebase.aimAtNote(visionbase.camera));
 

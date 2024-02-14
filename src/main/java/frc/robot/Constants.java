@@ -4,6 +4,11 @@
 
 package frc.robot;
 
+<<<<<<< Updated upstream
+=======
+import com.pathplanner.lib.util.PIDConstants;
+
+>>>>>>> Stashed changes
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
@@ -31,6 +36,12 @@ public final class Constants
   public static final Matter CHASSIS    = new Matter(new Translation3d(0, 0, Units.inchesToMeters(8)), ROBOT_MASS);
   public static final double LOOP_TIME  = 0.13; //s, 20ms + 110ms sprk max velocity lag
 
+  public static final class AutonConstants
+  {
+    public static final PIDConstants TRANSLATION_PID = new PIDConstants(0.7, 0, 0);
+    public static final PIDConstants ANGLE_PID   = new PIDConstants(0.4, 0, 0.01);
+  }
+
   public static final class Drivebase
   {
 
@@ -48,6 +59,7 @@ public final class Constants
     public static final double TURN_CONSTANT    = 6;
   }
 
+<<<<<<< Updated upstream
   public static class ManipulatorConstants
   {
     public static final int intakeMotorPort = 20;
@@ -56,6 +68,8 @@ public final class Constants
     public static final int rightArmMotorPort = 23;
   }
 
+=======
+>>>>>>> Stashed changes
   public static class Vision {
         public final static int BluePipeline = 0;
         public final static int RedPipeline = 1;
@@ -73,5 +87,8 @@ public final class Constants
         public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
         public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
     }
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 }
