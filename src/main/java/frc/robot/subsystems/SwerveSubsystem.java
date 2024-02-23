@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants.AutonConstants;
 
 import java.io.File;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -48,6 +49,7 @@ public class SwerveSubsystem extends SubsystemBase
    * Maximum speed of the robot in meters per second, used to limit acceleration.
    */
   public        double      maximumSpeed = Units.feetToMeters(14.5);
+  public double maxSpeed;
 
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
@@ -145,6 +147,10 @@ public class SwerveSubsystem extends SubsystemBase
   {
     // Create a path following command using AutoBuilder. This will also trigger event markers.
     return new PathPlannerAuto(pathName);
+  }
+
+  public Command getPathCommand(PathPlannerPath pathName) {
+    return AutoBuilder.followPath(pathName);
   }
 
   /**
@@ -251,14 +257,18 @@ public class SwerveSubsystem extends SubsystemBase
    * @param angularRotationX Angular velocity of the robot to set. Cubed for smoother controls.
    * @return Drive command.
    */
-  public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX)
+  public Command driveCommand(boolean fieldRelative, DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX, BooleanSupplier lowSpeed, BooleanSupplier highSpeed)
   {
     return run(() -> {
       // Make the robot move
-      swerveDrive.drive(new Translation2d(Math.pow(translationX.getAsDouble(), 3) * swerveDrive.getMaximumVelocity(),
-                                          Math.pow(translationY.getAsDouble(), 3) * swerveDrive.getMaximumVelocity()),
-                        Math.pow(angularRotationX.getAsDouble(), 3) * swerveDrive.getMaximumAngularVelocity(),
-                        true,
+      if (lowSpeed.getAsBoolean()) {maxSpeed = .5;}
+      else if (highSpeed.getAsBoolean()) {maxSpeed = 1;}
+      else {maxSpeed = .8;}
+
+      swerveDrive.drive(new Translation2d(Math.pow((translationX.getAsDouble() * maxSpeed), 3) * swerveDrive.getMaximumVelocity(),
+                                          Math.pow((translationY.getAsDouble() * maxSpeed), 3) * swerveDrive.getMaximumVelocity()),
+                        Math.pow((angularRotationX.getAsDouble() * maxSpeed), 3) * swerveDrive.getMaximumAngularVelocity(),
+                        fieldRelative,
                         false);
     });
   }

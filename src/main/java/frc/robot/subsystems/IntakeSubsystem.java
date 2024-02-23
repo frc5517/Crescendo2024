@@ -49,7 +49,7 @@ public class IntakeSubsystem extends SubsystemBase {
     return runEnd(() -> {
       shooterMotor.set(shooterSpeed);
       Timer.delay(time);
-      intakeMotor.set(-intakeSpeed);
+      intakeMotor.set(intakeSpeed);
     }, () -> {
       shooterMotor.stopMotor();
       intakeMotor.stopMotor();
