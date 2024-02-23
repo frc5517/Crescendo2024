@@ -16,9 +16,13 @@ import frc.robot.Constants.ManipulatorConstants;
 public class ArmSubsystem extends SubsystemBase {
   /** Creates a new ArmSubsystem. */
 
+  // Initializes arm motors
   CANSparkMax leftArmMotor = new CANSparkMax(ManipulatorConstants.leftArmMotorPort, MotorType.kBrushless);
   CANSparkMax rightArmMotor = new CANSparkMax(ManipulatorConstants.rightArmMotorPort, MotorType.kBrushless);
 
+  /**
+   * Initialize {@link ArmSubsystem} with idle modes, inversions, and followers.
+   */
   public ArmSubsystem() {
     leftArmMotor.setIdleMode(IdleMode.kBrake);
     rightArmMotor.setIdleMode(IdleMode.kBrake);
@@ -29,25 +33,34 @@ public class ArmSubsystem extends SubsystemBase {
   @Override
   public void periodic() {}
 
+  /**
+   * Move the arm at set speed.
+   * @param speed to move the arm.
+   * @return A {@link Command} to move the arm.
+   */
   public Command ArmCommand(double speed) 
   {
     return runEnd(() -> {
-      leftArmMotor.set(speed);
+      leftArmMotor.set(speed); // move arm at "speed".
     }, () -> {
-      rightArmMotor.stopMotor();
+      rightArmMotor.stopMotor();  // stop both motors when done.
       leftArmMotor.stopMotor();
     }
    );
   }
 
+  /**
+   * Move the arm at set speed for set time.
+   * @param speed to move the arm.
+   * @param time to run command for.
+   * @return A {@link Command} to move the arm for set time.
+   */
   public Command ArmCommandForTime(double speed, double time) {
     return runEnd(() -> {
-      leftArmMotor.set(speed);
-      Timer.delay(time);
-      leftArmMotor.stopMotor();
-      rightArmMotor.stopMotor();
+      leftArmMotor.set(speed); // move arm at "speed".
+      Timer.delay(time);  // keep running for "time".
     }, () -> {
-      leftArmMotor.stopMotor();
+      leftArmMotor.stopMotor(); // stop both motors when done.
       rightArmMotor.stopMotor();
     });
   }

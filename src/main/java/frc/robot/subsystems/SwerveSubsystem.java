@@ -132,8 +132,23 @@ public class SwerveSubsystem extends SubsystemBase
         drive(getTargetSpeeds(0,
                               0,
                               Rotation2d.fromDegrees(-result.getBestTarget()
-                                                           .getYaw()))); // Not sure if this will work, more math may be required.
+                                                           .getYaw())));
       }
+    });
+  }
+
+  /**
+   * Aim the robot at the target returned by PhotonVision for time.
+   *
+   * @param camera {@link PhotonCamera} to communicate with.
+   * @param time to determine how long to align. 
+   * @return A {@link Command} which will run the alignment.
+   */
+  public Command aimAtTargetForTime(PhotonCamera camera, double time)
+  {
+    return run(() -> {
+      aimAtTarget(camera);
+      Timer.delay(time);
     });
   }
 

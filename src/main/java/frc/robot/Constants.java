@@ -33,14 +33,12 @@ public final class Constants
 
   public static final class Drivebase
   {
-
     // Hold time on motor brakes when disabled
     public static final double WHEEL_LOCK_TIME = 10; // seconds
   }
 
   public static class OperatorConstants
   {
-
     // Joystick Deadband
     public static final double LEFT_X_DEADBAND  = 0.1;
     public static final double LEFT_Y_DEADBAND  = 0.1;
@@ -50,13 +48,13 @@ public final class Constants
 
   public static class ManipulatorConstants
   {
-    public static final int intakeMotorPort = 10;
-    public static final int shooterMotorPort= 11;
-    public static final int leftArmMotorPort = 12;
-    public static final int rightArmMotorPort = 13;
+    public static final int intakeMotorPort = 10; // brushed intake motor with spark max
+    public static final int shooterMotorPort= 11; // brushed shooter motor with spark max
+    public static final int leftArmMotorPort = 12; // brushless arm motor with spark max
+    public static final int rightArmMotorPort = 13; // brushless arm motor with spark max
   }
 
   public static class Vision {
-        public static final String kCameraName = "Camera";
+        public static final String kCameraName = "Camera"; // photoncamera with name "Camera"
     }
 }
