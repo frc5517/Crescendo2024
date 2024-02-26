@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.4719329438719218,
-      "y": 5.545221859674485
+      "x": 1.5,
+      "y": 5.55
     },
-    "rotation": 0.0
+    "rotation": 0
   },
   "command": {
     "type": "sequential",
@@ -14,7 +14,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Shoot and Park"
+            "pathName": "Shoot high and Park"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "pick up ring"
           }
         }
       ]

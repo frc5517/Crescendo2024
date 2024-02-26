@@ -10,11 +10,15 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.ReplanningConfig;
+
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -191,52 +195,6 @@ public class SwerveSubsystem extends SubsystemBase
   }
 
   /**
-   * Command to drive the robot using translative values and heading as a setpoint.
-   *
-   * @param translationX Translation in the X direction. Cubed for smoother controls.
-   * @param translationY Translation in the Y direction. Cubed for smoother controls.
-   * @param headingX     Heading X to calculate angle of the joystick.
-   * @param headingY     Heading Y to calculate angle of the joystick.
-   * @return Drive command.
-   */
-  public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier headingX,
-                              DoubleSupplier headingY)
-  {
-    // swerveDrive.setHeadingCorrection(true); // Normally you would want heading correction for this kind of control.
-    return run(() -> {
-      double xInput = Math.pow(translationX.getAsDouble(), 3); // Smooth controll out
-      double yInput = Math.pow(translationY.getAsDouble(), 3); // Smooth controll out
-      // Make the robot move
-      driveFieldOriented(swerveDrive.swerveController.getTargetSpeeds(xInput, yInput,
-                                                                      headingX.getAsDouble(),
-                                                                      headingY.getAsDouble(),
-                                                                      swerveDrive.getOdometryHeading().getRadians(),
-                                                                      swerveDrive.getMaximumVelocity()));
-    });
-  }
-
-  /**
-   * Command to drive the robot using translative values and heading as a setpoint.
-   *
-   * @param translationX Translation in the X direction.
-   * @param translationY Translation in the Y direction.
-   * @param rotation     Rotation as a value between [-1, 1] converted to radians.
-   * @return Drive command.
-   */
-  public Command simDriveCommand(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier rotation)
-  {
-    // swerveDrive.setHeadingCorrection(true); // Normally you would want heading correction for this kind of control.
-    return run(() -> {
-      // Make the robot move
-      driveFieldOriented(swerveDrive.swerveController.getTargetSpeeds(translationX.getAsDouble(),
-                                                                      translationY.getAsDouble(),
-                                                                      rotation.getAsDouble() * Math.PI,
-                                                                      swerveDrive.getOdometryHeading().getRadians(),
-                                                                      swerveDrive.getMaximumVelocity()));
-    });
-  }
-
-  /**
    * Command to characterize the robot drive motors using SysId
    *
    * @return SysId Drive Command
@@ -280,9 +238,9 @@ public class SwerveSubsystem extends SubsystemBase
       else if (highSpeed.getAsBoolean()) {maxSpeed = 1;}
       else {maxSpeed = .8;}
 
-      swerveDrive.drive(new Translation2d(Math.pow((translationX.getAsDouble() * maxSpeed), 3) * swerveDrive.getMaximumVelocity(),
-                                          Math.pow((translationY.getAsDouble() * maxSpeed), 3) * swerveDrive.getMaximumVelocity()),
-                        Math.pow((angularRotationX.getAsDouble() * maxSpeed), 3) * swerveDrive.getMaximumAngularVelocity(),
+      swerveDrive.drive(new Translation2d(Math.pow(translationX.getAsDouble(), 3) * (swerveDrive.getMaximumVelocity() * maxSpeed),
+                                          Math.pow(translationY.getAsDouble(), 3) * (swerveDrive.getMaximumVelocity() * maxSpeed)),
+                        Math.pow(angularRotationX.getAsDouble(), 3) * (swerveDrive.getMaximumAngularVelocity() * maxSpeed),
                         fieldRelative,
                         false);
     });
@@ -332,13 +290,11 @@ public class SwerveSubsystem extends SubsystemBase
 
   @Override
   public void periodic()
-  {
-  }
+  {}
 
   @Override
   public void simulationPeriodic()
-  {
-  }
+  {}
 
   /**
    * Get the swerve drive kinematics object.
@@ -520,6 +476,21 @@ public class SwerveSubsystem extends SubsystemBase
   {
     return swerveDrive.getPitch();
   }
+
+  public void resetPose(Pose2d pose) {
+    swerveDrive.resetOdometry(pose);
+}
+
+/**
+ * Adds the vision target measurement so that the swerve can move to the target.
+ * @param visionMeasurement target position and rotation.
+ * @param timestampSeconds 
+ * @param stdDevs The standard deviations of our vision estimated poses, which affect correction rate.
+ */
+public void addVisionMeasurement(
+            Pose2d visionMeasurement, double timestampSeconds, Matrix<N3, N1> stdDevs) {
+        swerveDrive.addVisionMeasurement(visionMeasurement, timestampSeconds, stdDevs);
+    }
 
   /**
    * Add a fake vision reading for testing purposes.

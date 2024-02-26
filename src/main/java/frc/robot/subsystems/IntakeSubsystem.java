@@ -9,6 +9,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ManipulatorConstants;
@@ -26,6 +27,8 @@ public class IntakeSubsystem extends SubsystemBase {
   public IntakeSubsystem() {
     intakeMotor.setInverted(false);
     shooterMotor.setInverted(true);
+    
+    SmartDashboard.putData("Note Sensor", noteSensor);
   }
 
   @Override
@@ -34,12 +37,32 @@ public class IntakeSubsystem extends SubsystemBase {
   /**
    * Run the intake at set speed.
    * @param speed to intake note.
-   * @return A {@link Command} to run the intake.
+   * @return A {@link Command} to run the intake for set time.
    */
   public Command IntakeCommand(Double speed)
   {
+    return runEnd(() -> {
+      intakeMotor.set(speed); // outtake note without sensor
+    }, () -> {
+      intakeMotor.stopMotor();  // stop intake when done.
+    }
+   );
+  }
+
+  /**
+   * Run the intake at set speed if no note is detected.
+   * @param speed to intake note.
+   * @return A {@link Command} to run the intake if theres no note.
+   */
+  public Command IntakeWithSensor(Double speed)
+  {
     return runEnd(() -> { 
-      intakeMotor.set(speed); // intake note at "speed".
+      if (noteSensor.get() == true) {  // if theres no note allow intake to run otherwise stop intake
+        intakeMotor.set(speed);
+      }
+      else {
+        intakeMotor.stopMotor();
+      }
     }, () -> {
       intakeMotor.stopMotor(); // stop motor when done.
     }
@@ -47,20 +70,39 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   /**
-   * Run the intake at set speed for set time.
+   * Run the intake at set speed until note is detected, stop intake for time when note detected. 
    * @param speed to intake note.
-   * @param time to run command for.
-   * @return A {@link Command} to run the intake for set time.
+   * @param time to stop intake for.
+   * @return A {@link Command} to run the intake until a note is detected. 
    */
-  public Command IntakeCommandForTime(Double speed, double time)
-  {
+  public Command IntakeStop(Double speed, Double time) {
     return runEnd(() -> {
-      intakeMotor.set(speed); // intake note at "speed".
-      Timer.delay(time);  // keep running for "time".
+      if (noteSensor.get() == false) {  // If note detected stop motor for at least 1 second. 
+        intakeMotor.stopMotor();
+        Timer.delay(time);
+      }
+      else {
+        intakeMotor.set(speed);
+      }
     }, () -> {
-      intakeMotor.stopMotor();  // stop intake when done.
-    }
-   );
+      intakeMotor.stopMotor();  // Stop motor if ended. 
+    });
+  }
+
+  /**
+   * Run the intake at set speed for time. 
+   * @param speed to run intake at. 
+   * @param time to run intake for.
+   * @return A {@link Command} to run intake for set time. 
+   */
+  public Command IntakeForTime(Double speed, Double time) {
+    return runEnd(() -> {
+      intakeMotor.set(speed); // Intake at speed for time then stop motor. 
+      Timer.delay(time);
+      intakeMotor.stopMotor();
+    }, () -> {
+      intakeMotor.stopMotor();  // Stop motor if ended. 
+    });
   }
 
   /**
