@@ -5,11 +5,16 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.ColorMatch;
+import com.revrobotics.ColorMatchResult;
+import com.revrobotics.ColorSensorV3;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ManipulatorConstants;
@@ -21,18 +26,77 @@ public class IntakeSubsystem extends SubsystemBase {
   CANSparkMax shooterMotor = new CANSparkMax(ManipulatorConstants.shooterMotorPort, MotorType.kBrushed);
   DigitalInput noteSensor = new DigitalInput(0);
 
+  ColorSensorV3 colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
+  ColorMatch colorMatch = new ColorMatch();
+  Color noteColor = new Color(.629, .318, .060);
+
   /**
    * Initialize {@link IntakeSubsystem} with idle modes.
    */
   public IntakeSubsystem() {
     intakeMotor.setInverted(false);
     shooterMotor.setInverted(true);
+
+    colorMatch.setConfidenceThreshold(.95);
+
+    colorMatch.addColorMatch(noteColor); 
+    colorMatch.addColorMatch(Color.kOrange);
+    colorMatch.addColorMatch(Color.kRed);
+    colorMatch.addColorMatch(Color.kGreen);
+    colorMatch.addColorMatch(Color.kBlue);
+    colorMatch.addColorMatch(Color.kYellow);
+    colorMatch.addColorMatch(Color.kBlack);
     
     SmartDashboard.putData("Note Sensor", noteSensor);
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    Color detectedColor = colorSensor.getColor();
+
+    SmartDashboard.putNumber("Red", detectedColor.red);
+    SmartDashboard.putNumber("Green", detectedColor.green);
+    SmartDashboard.putNumber("Blue", detectedColor.blue);
+    SmartDashboard.putNumber("IR", colorSensor.getIR());
+    SmartDashboard.putNumber("Prox", colorSensor.getProximity()); // <200
+
+    ColorMatchResult match = colorMatch.matchClosestColor(detectedColor);
+
+    ColorMatchResult test = colorMatch.matchColor(detectedColor);
+    
+    String detected;
+    
+    if (test.color.equals(noteColor)) {
+      detected = "Test Match Note";
+    }
+    else if (match.color == noteColor && colorSensor.getProximity() > 200) {
+      detected = "Note Detected";
+    }
+    else if (match.color == noteColor) {
+      detected = "Note Color";
+    }
+    else if (match.color == Color.kOrange) {
+      detected = "kOrange";
+    }
+    else if (match.color == Color.kRed) {
+      detected = "Red";
+    }
+    else if (match.color == Color.kGreen) {
+      detected = "Green";
+    }
+    else if (match.color == Color.kBlue) {
+      detected = "Blue";
+    }
+    else if (match.color == Color.kYellow) {
+      detected = "Yellow";
+    }
+    else {
+      detected = "nothing";
+    }
+
+    SmartDashboard.putNumber("Confidence", match.confidence);
+    SmartDashboard.putString("Color Sensor", detected);
+  }
 
   /**
    * Run the intake at set speed.
@@ -77,7 +141,7 @@ public class IntakeSubsystem extends SubsystemBase {
    */
   public Command IntakeStop(Double speed, Double time) {
     return runEnd(() -> {
-      if (noteSensor.get() == false) {  // If note detected stop motor for at least 1 second. 
+      if (noteSensor.get() == false) {  // If note detected stop motor for set time. 
         intakeMotor.stopMotor();
         Timer.delay(time);
       }
