@@ -7,6 +7,7 @@ package frc.robot;
 import java.io.File;
 import org.photonvision.PhotonCamera;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.MathUtil;
@@ -14,13 +15,15 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.VisionTrack;
 import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
@@ -28,7 +31,10 @@ public class RobotContainer {
 
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
   private final IntakeSubsystem intakebase = new IntakeSubsystem();
+  private final ClimberSubsystem climbbase = new ClimberSubsystem();
   private final ArmSubsystem armbase = new ArmSubsystem();
+
+  private final SendableChooser<Command> autoChooser;
 
   CommandXboxController driverXbox = new CommandXboxController(0);
   CommandXboxController operatorXbox = new CommandXboxController(1);
@@ -37,6 +43,8 @@ public class RobotContainer {
 
   public RobotContainer() {
     configureBindings();
+    autoChooser = AutoBuilder.buildAutoChooser(); // Builds auton sendable chooser for pathplanner.
+    SmartDashboard.putData(autoChooser);  // Sends autoBuilder to smartdashboard.
 
     // Register the commands for FRC PathPlanner
     NamedCommands.registerCommand("Raise Arm", armbase.ArmCommandForTime(.3, 1));
@@ -44,20 +52,20 @@ public class RobotContainer {
     NamedCommands.registerCommand("Shoot High", intakebase.ShootCommandForTime(1, .7, 1, 2));
     NamedCommands.registerCommand("Shoot Low", intakebase.ShootCommandForTime(.5, .3, 1, 2));
     NamedCommands.registerCommand("Aim at Note", drivebase.aimAtTargetForTime(camera, 1));
-    NamedCommands.registerCommand("Intake Note",intakebase.IntakeCommand(.7));
+    NamedCommands.registerCommand("Intake Note",intakebase.IntakeWithSensor(.7));
 
     // Creating the robot centric swerve drive
     Command closedDrive = drivebase.driveCommand(false, 
-    () -> MathUtil.applyDeadband(-driverXbox.getLeftX(), OperatorConstants.LEFT_Y_DEADBAND), 
-    () -> MathUtil.applyDeadband(-driverXbox.getLeftY(), OperatorConstants.LEFT_X_DEADBAND), 
+    () -> MathUtil.applyDeadband(-driverXbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND), 
+    () -> MathUtil.applyDeadband(-driverXbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND), 
     () -> MathUtil.applyDeadband(-driverXbox.getRightX(), OperatorConstants.RIGHT_X_DEADBAND),
     driverXbox.leftBumper(),
     driverXbox.rightBumper());
 
     // Creating the field centric swerve drive
     Command fieldDrive = drivebase.driveCommand(true, 
-    () -> MathUtil.applyDeadband(-driverXbox.getLeftX(), OperatorConstants.LEFT_Y_DEADBAND), 
-    () -> MathUtil.applyDeadband(-driverXbox.getLeftY(), OperatorConstants.LEFT_X_DEADBAND), 
+    () -> MathUtil.applyDeadband(-driverXbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND), 
+    () -> MathUtil.applyDeadband(-driverXbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND), 
     () -> MathUtil.applyDeadband(-driverXbox.getRightX(), OperatorConstants.RIGHT_X_DEADBAND),
     driverXbox.leftBumper(),
     driverXbox.rightBumper());
@@ -70,7 +78,7 @@ public class RobotContainer {
     // driverXbox.leftTrigger(.3).whileTrue(drivebase.aimAtTarget(camera)); // Look at the note
     driverXbox.y().whileTrue(Commands.deferredProxy(() -> drivebase.driveToPose // Drive to position on field
     (new Pose2d(new Translation2d(1.47, 5.55), Rotation2d.fromDegrees(90)))));
-    driverXbox.leftTrigger(.3).whileTrue(new VisionTrack(drivebase, camera));
+    driverXbox.leftTrigger(.3).whileTrue(drivebase.aimAtTarget(camera));
 
 
     operatorXbox.y().whileTrue(armbase.ArmCommand(.3)); // Raise the arm
@@ -79,11 +87,16 @@ public class RobotContainer {
     operatorXbox.leftBumper().whileTrue(intakebase.IntakeWithSensor(.6));  // Intake the note
     operatorXbox.x().whileTrue(intakebase.ShootCommand(.6, .5, 0)); // Spit the note into the amp
     operatorXbox.rightBumper().whileTrue(intakebase.ShootCommand(1, .7, 1));  // Shoot the note into the speaker
+    operatorXbox.start().whileTrue(climbbase.climberCommand(.8));
+    operatorXbox.back().whileTrue(climbbase.climberCommand(-.8));
+    operatorXbox.pov(0).whileTrue(armbase.moveToSetpoint(.3, 45));
+    operatorXbox.pov(180).onTrue(new InstantCommand(armbase::disableLimit));
+    operatorXbox.pov(90).onTrue(new InstantCommand(armbase::resetEncoder));
   }
 
   public void configureBindings() {}
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    return autoChooser.getSelected();
   }
 }

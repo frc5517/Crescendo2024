@@ -77,4 +77,8 @@ public final class Constants
     public static final int leftArmMotorPort = 12; // brushless arm motor with spark max
     public static final int rightArmMotorPort = 13; // brushless arm motor with spark max
   }
+
+  public static class ClimberConstants {
+    public static final int climberMotorPort = 14;  
+  }
 }
