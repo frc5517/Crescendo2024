@@ -22,8 +22,8 @@ public class ArmSubsystem extends SubsystemBase {
   // Initializes arm motors
   CANSparkMax leftArmMotor = new CANSparkMax(ManipulatorConstants.leftArmMotorPort, MotorType.kBrushless);
   CANSparkMax rightArmMotor = new CANSparkMax(ManipulatorConstants.rightArmMotorPort, MotorType.kBrushless);
-  DigitalInput topLimit = new DigitalInput(1);
-  DigitalInput bottomLimit = new DigitalInput(2);
+  DigitalInput topLimit = new DigitalInput(0);
+  DigitalInput bottomLimit = new DigitalInput(1);
   RelativeEncoder encoder = leftArmMotor.getEncoder();
 
   /**
@@ -63,23 +63,22 @@ public class ArmSubsystem extends SubsystemBase {
    */
   public Command ArmCommand(double speed) 
   {
-    return runEnd(() -> { /* 
+    return runEnd(() -> {
       if (speed > 0) {
-        if (topLimit.get() == false) { // We are going up and top limit is tripped so stop
+        if (topLimit.get()) { // We are going up and top limit is tripped so stop
             leftArmMotor.set(0);
             encoder.setPosition(0);
         } else {  // We are going up but top limit is not tripped so go at commanded speed
             leftArmMotor.set(speed);
         }
     } else {
-        if (bottomLimit.get() == false) {  // We are going down and bottom limit is tripped so stop
+        if (bottomLimit.get()) {  // We are going down and bottom limit is tripped so stop
             leftArmMotor.set(0);
             encoder.setPosition(90);
         } else {  // We are going down but bottom limit is not tripped so go at commanded speed
             leftArmMotor.set(speed);
         } 
-      } */
-      leftArmMotor.set(speed);
+      }
     }, () -> {
       rightArmMotor.stopMotor();  // stop both motors when done.
       leftArmMotor.stopMotor();
