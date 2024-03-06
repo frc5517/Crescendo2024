@@ -7,9 +7,9 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -22,6 +22,8 @@ public class ArmSubsystem extends SubsystemBase {
   // Initializes arm motors
   CANSparkMax leftArmMotor = new CANSparkMax(ManipulatorConstants.leftArmMotorPort, MotorType.kBrushless);
   CANSparkMax rightArmMotor = new CANSparkMax(ManipulatorConstants.rightArmMotorPort, MotorType.kBrushless);
+  DigitalInput topLimit = new DigitalInput(1);
+  DigitalInput bottomLimit = new DigitalInput(2);
   RelativeEncoder encoder = leftArmMotor.getEncoder();
 
   /**
@@ -30,11 +32,6 @@ public class ArmSubsystem extends SubsystemBase {
   public ArmSubsystem() {
     leftArmMotor.setIdleMode(IdleMode.kBrake);
     rightArmMotor.setIdleMode(IdleMode.kBrake);
-
-    leftArmMotor.setSoftLimit(SoftLimitDirection.kForward, 93);
-    leftArmMotor.setSoftLimit(SoftLimitDirection.kReverse, 1);
-    leftArmMotor.enableSoftLimit(SoftLimitDirection.kForward, true);
-    leftArmMotor.enableSoftLimit(SoftLimitDirection.kReverse, true);
 
     rightArmMotor.follow(leftArmMotor, true);
   }
@@ -45,23 +42,13 @@ public class ArmSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Arm Encoder Raw", encoder.getPosition());
   }
 
-  public void resetEncoder() {
-    encoder.setPosition(0);
-  }
-
-  public void disableLimit() {
-    leftArmMotor.enableSoftLimit(SoftLimitDirection.kForward, false);
-    leftArmMotor.enableSoftLimit(SoftLimitDirection.kReverse, false);
-  }
-
   public Command moveToSetpoint(double speed, double setpoint) {
     return runEnd(() -> {
-      double finalSpeed = speed; //* Math.abs(encoder.getPosition() - setpoint);
       while (encoder.getPosition() < setpoint) {
-        leftArmMotor.set(finalSpeed);
+        leftArmMotor.set(speed);
       }
       while (encoder.getPosition() > setpoint) {
-        leftArmMotor.set(-finalSpeed);
+        leftArmMotor.set(-speed);
       }
     }, () -> {
       rightArmMotor.stopMotor();
@@ -76,8 +63,23 @@ public class ArmSubsystem extends SubsystemBase {
    */
   public Command ArmCommand(double speed) 
   {
-    return runEnd(() -> {
-      leftArmMotor.set(speed); // move arm at "speed".
+    return runEnd(() -> { /* 
+      if (speed > 0) {
+        if (topLimit.get() == false) { // We are going up and top limit is tripped so stop
+            leftArmMotor.set(0);
+            encoder.setPosition(0);
+        } else {  // We are going up but top limit is not tripped so go at commanded speed
+            leftArmMotor.set(speed);
+        }
+    } else {
+        if (bottomLimit.get() == false) {  // We are going down and bottom limit is tripped so stop
+            leftArmMotor.set(0);
+            encoder.setPosition(90);
+        } else {  // We are going down but bottom limit is not tripped so go at commanded speed
+            leftArmMotor.set(speed);
+        } 
+      } */
+      leftArmMotor.set(speed);
     }, () -> {
       rightArmMotor.stopMotor();  // stop both motors when done.
       leftArmMotor.stopMotor();
@@ -93,7 +95,21 @@ public class ArmSubsystem extends SubsystemBase {
    */
   public Command ArmCommandForTime(double speed, double time) {
     return runEnd(() -> {
-      leftArmMotor.set(speed); // move arm at "speed".
+      if (speed > 0) {
+        if (topLimit.get()) { // We are going up and top limit is tripped so stop
+            leftArmMotor.set(0);
+            encoder.setPosition(0);
+        } else {  // We are going up but top limit is not tripped so go at commanded speed
+            leftArmMotor.set(speed);
+        }
+    } else {
+        if (bottomLimit.get()) {  // We are going down and bottom limit is tripped so stop
+            leftArmMotor.set(0);
+            encoder.setPosition(90);
+        } else {  // We are going down but bottom limit is not tripped so go at commanded speed
+            leftArmMotor.set(speed);
+        }
+      }
       Timer.delay(time);  // keep running for "time".
     }, () -> {
       leftArmMotor.stopMotor(); // stop both motors when done.

@@ -49,7 +49,7 @@ public class RobotContainer {
     // Register the commands for FRC PathPlanner
     NamedCommands.registerCommand("Raise Arm", armbase.ArmCommandForTime(.3, 1));
     NamedCommands.registerCommand("Lower Arm", armbase.ArmCommandForTime(-.3, 1));
-    NamedCommands.registerCommand("Shoot High", intakebase.ShootCommandForTime(1, .7, 1, 2));
+    NamedCommands.registerCommand("Shoot High", intakebase.ShootCommandForTime(1, .7, 1, 1));
     NamedCommands.registerCommand("Shoot Low", intakebase.ShootCommandForTime(.5, .3, 1, 2));
     NamedCommands.registerCommand("Aim at Note", drivebase.aimAtTargetForTime(camera, 1));
     NamedCommands.registerCommand("Intake Note",intakebase.IntakeWithSensor(.7));
@@ -80,18 +80,18 @@ public class RobotContainer {
     (new Pose2d(new Translation2d(1.47, 5.55), Rotation2d.fromDegrees(90)))));
     driverXbox.leftTrigger(.3).whileTrue(drivebase.aimAtTarget(camera));
 
+    driverXbox.a().whileTrue(drivebase.getPathCommand("New Path"));
+
 
     operatorXbox.y().whileTrue(armbase.ArmCommand(.3)); // Raise the arm
     operatorXbox.a().whileTrue(armbase.ArmCommand(-.3));  // Lower the arm
-    operatorXbox.b().whileTrue(intakebase.IntakeCommand(-.7));  // Outtake the note
+    operatorXbox.b().whileTrue(intakebase.IntakeCommand(-.3));  // Outtake the note
     operatorXbox.leftBumper().whileTrue(intakebase.IntakeWithSensor(.6));  // Intake the note
-    operatorXbox.x().whileTrue(intakebase.ShootCommand(.6, .5, 0)); // Spit the note into the amp
+    operatorXbox.x().whileTrue(intakebase.ShootCommand(.6, .5, .2)); // Spit the note into the amp
     operatorXbox.rightBumper().whileTrue(intakebase.ShootCommand(1, .7, 1));  // Shoot the note into the speaker
     operatorXbox.start().whileTrue(climbbase.climberCommand(.8));
     operatorXbox.back().whileTrue(climbbase.climberCommand(-.8));
     operatorXbox.pov(0).whileTrue(armbase.moveToSetpoint(.3, 45));
-    operatorXbox.pov(180).onTrue(new InstantCommand(armbase::disableLimit));
-    operatorXbox.pov(90).onTrue(new InstantCommand(armbase::resetEncoder));
   }
 
   public void configureBindings() {}

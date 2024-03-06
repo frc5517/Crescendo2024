@@ -168,8 +168,9 @@ public class SwerveSubsystem extends SubsystemBase
     return new PathPlannerAuto(pathName);
   }
 
-  public Command getPathCommand(PathPlannerPath pathName) {
-    return AutoBuilder.followPath(pathName);
+  public Command getPathCommand(String pathName) {
+    PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+    return AutoBuilder.followPath(path);
   }
 
   /**

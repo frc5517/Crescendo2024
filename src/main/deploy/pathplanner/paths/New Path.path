@@ -3,57 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.5,
-        "y": 6.3
+        "x": 2.0,
+        "y": 7.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.162169555108342,
-        "y": 6.9956624528633675
+        "x": 3.0,
+        "y": 7.0
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.0,
-        "y": 6.9956624528633675
+        "x": 4.0,
+        "y": 6.0
       },
       "prevControl": {
-        "x": 4.874822993732636,
-        "y": 6.9956624528633675
+        "x": 3.0,
+        "y": 6.0
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.8,
-      "rotationDegrees": 180.0,
-      "rotateFast": true
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "eventMarkers": [
     {
-      "name": "pick up note",
-      "waypointRelativePos": 0.85,
+      "name": "New Event Marker",
+      "waypointRelativePos": 0.3,
       "command": {
-        "type": "sequential",
+        "type": "parallel",
         "data": {
           "commands": [
             {
               "type": "named",
               "data": {
-                "name": "Lower Arm"
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "Intake Note"
+                "name": "Shoot High"
               }
             }
           ]
@@ -69,7 +57,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 179.48383577023517,
+    "rotation": 0,
     "rotateFast": false
   },
   "reversed": false,
