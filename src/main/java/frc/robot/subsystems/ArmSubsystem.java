@@ -10,7 +10,6 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -105,35 +104,5 @@ public class ArmSubsystem extends SubsystemBase {
 
   public void ArmEncoderUp() {
     encoder.setPosition(90);
-  }
-
-  /**
-   * Move the arm at set speed for set time.
-   * @param speed to move the arm.
-   * @param time to run command for.
-   * @return A {@link Command} to move the arm for set time.
-   */
-  public Command ArmCommandForTime(double speed, double time) {
-    return runEnd(() -> {
-      if (speed > 0) {
-        if (topLimit.get()) { // We are going up and top limit is tripped so stop
-            leftArmMotor.set(0);
-            encoder.setPosition(100);
-        } else {  // We are going up but top limit is not tripped so go at commanded speed
-            leftArmMotor.set(speed);
-        }
-    } else {
-        if (bottomLimit.get()) {  // We are going down and bottom limit is tripped so stop
-            leftArmMotor.set(0);
-            encoder.setPosition(0);
-        } else {  // We are going down but bottom limit is not tripped so go at commanded speed
-            leftArmMotor.set(speed);
-        }
-      }
-      Timer.delay(time);  // keep running for "time".
-    }, () -> {
-      leftArmMotor.stopMotor(); // stop both motors when done.
-      rightArmMotor.stopMotor();
-    });
   }
 }
