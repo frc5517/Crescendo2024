@@ -44,6 +44,23 @@ public class ArmSubsystem extends SubsystemBase {
 
   public Command moveToSetpoint(double speed, double setpoint) {
     return runEnd(() -> {
+
+      if (speed > 0) {
+        if (topLimit.get()) { // We are going up and top limit is tripped so stop
+            leftArmMotor.set(0);
+            encoder.setPosition(90);
+        } else {  // We are going up but top limit is not tripped so go at commanded speed
+            leftArmMotor.set(speed);
+        }
+    } else {
+        if (bottomLimit.get()) {  // We are going down and bottom limit is tripped so stop
+            leftArmMotor.set(0);
+            encoder.setPosition(0);
+        } else {  // We are going down but bottom limit is not tripped so go at commanded speed
+            leftArmMotor.set(speed);
+        } 
+      }
+
       while (encoder.getPosition() < setpoint) {
         leftArmMotor.set(speed);
       }
@@ -67,14 +84,14 @@ public class ArmSubsystem extends SubsystemBase {
       if (speed > 0) {
         if (topLimit.get()) { // We are going up and top limit is tripped so stop
             leftArmMotor.set(0);
-            encoder.setPosition(0);
+            encoder.setPosition(90);
         } else {  // We are going up but top limit is not tripped so go at commanded speed
             leftArmMotor.set(speed);
         }
     } else {
         if (bottomLimit.get()) {  // We are going down and bottom limit is tripped so stop
             leftArmMotor.set(0);
-            encoder.setPosition(90);
+            encoder.setPosition(0);
         } else {  // We are going down but bottom limit is not tripped so go at commanded speed
             leftArmMotor.set(speed);
         } 
@@ -84,6 +101,10 @@ public class ArmSubsystem extends SubsystemBase {
       leftArmMotor.stopMotor();
     }
    );
+  }
+
+  public void ArmEncoderUp() {
+    encoder.setPosition(90);
   }
 
   /**
@@ -97,14 +118,14 @@ public class ArmSubsystem extends SubsystemBase {
       if (speed > 0) {
         if (topLimit.get()) { // We are going up and top limit is tripped so stop
             leftArmMotor.set(0);
-            encoder.setPosition(0);
+            encoder.setPosition(100);
         } else {  // We are going up but top limit is not tripped so go at commanded speed
             leftArmMotor.set(speed);
         }
     } else {
         if (bottomLimit.get()) {  // We are going down and bottom limit is tripped so stop
             leftArmMotor.set(0);
-            encoder.setPosition(90);
+            encoder.setPosition(0);
         } else {  // We are going down but bottom limit is not tripped so go at commanded speed
             leftArmMotor.set(speed);
         }

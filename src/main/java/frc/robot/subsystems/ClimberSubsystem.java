@@ -22,10 +22,10 @@ public class ClimberSubsystem extends SubsystemBase {
   public ClimberSubsystem() {
     climberMoter.setIdleMode(IdleMode.kBrake);
     
-    climberMoter.setSoftLimit(SoftLimitDirection.kForward, 510);
-    climberMoter.setSoftLimit(SoftLimitDirection.kReverse, -485);
-    climberMoter.enableSoftLimit(SoftLimitDirection.kForward, true);
-    climberMoter.enableSoftLimit(SoftLimitDirection.kReverse, true);
+    climberMoter.setSoftLimit(SoftLimitDirection.kForward, 570);
+    climberMoter.setSoftLimit(SoftLimitDirection.kReverse, -80);
+    climberMoter.enableSoftLimit(SoftLimitDirection.kForward, false);
+    climberMoter.enableSoftLimit(SoftLimitDirection.kReverse, false);
   }
 
   @Override

@@ -141,6 +141,19 @@ public class SwerveSubsystem extends SubsystemBase
     });
   }
 
+  public Command aimAtTargetNew(PhotonCamera camera, DoubleSupplier translationX, DoubleSupplier translationY) {
+    return run(() -> {
+      PhotonPipelineResult result = camera.getLatestResult();
+      if (result.hasTargets()) {
+        swerveDrive.drive(new Translation2d(Math.pow(translationX.getAsDouble(), 3) * (swerveDrive.getMaximumVelocity()),
+                                          Math.pow(translationY.getAsDouble(), 3) * (swerveDrive.getMaximumVelocity())),
+                        Math.pow(-result.getBestTarget().getYaw(), 3) * (swerveDrive.getMaximumAngularVelocity()),
+                        false,
+                        false);
+      }
+    });
+  }
+
   /**
    * Aim the robot at the target returned by PhotonVision for time.
    *
@@ -237,7 +250,7 @@ public class SwerveSubsystem extends SubsystemBase
       // Make the robot move
       if (lowSpeed.getAsBoolean()) {maxSpeed = .5;}
       else if (highSpeed.getAsBoolean()) {maxSpeed = 1;}
-      else {maxSpeed = .8;}
+      else {maxSpeed = .7;}
 
       swerveDrive.drive(new Translation2d(Math.pow(translationX.getAsDouble(), 3) * (swerveDrive.getMaximumVelocity() * maxSpeed),
                                           Math.pow(translationY.getAsDouble(), 3) * (swerveDrive.getMaximumVelocity() * maxSpeed)),

@@ -1,0 +1,49 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.8338753339418218,
+      "y": 4.356431195030721
+    },
+    "rotation": -60.25511870305779
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "Arm Encoder Up"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Move To Setpoint"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot High"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "score diagnal park"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}
