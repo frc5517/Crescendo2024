@@ -60,6 +60,9 @@ public class RobotContainer {
 
     CameraServer.startAutomaticCapture().setResolution(480, 320);
 
+    autoChooser = AutoBuilder.buildAutoChooser(); // Builds auton sendable chooser for pathplanner.
+    SmartDashboard.putData(autoChooser);  // Sends autoBuilder to smartdashboard.
+
     // Creating the robot centric swerve drive
     Command closedDrive = drivebase.driveCommand(false, 
     () -> MathUtil.applyDeadband(-driverXbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND), 
