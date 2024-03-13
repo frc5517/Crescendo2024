@@ -11,7 +11,6 @@ import org.photonvision.PhotonCamera;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
-import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -30,17 +29,20 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
 public class RobotContainer {
-
+  // Creates the subsystems
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
   private final IntakeSubsystem intakebase = new IntakeSubsystem();
   private final ClimberSubsystem climbbase = new ClimberSubsystem();
   private final ArmSubsystem armbase = new ArmSubsystem();
 
+  // Creates the auton sendable chooser
   private final SendableChooser<Command> autoChooser;
 
+  // Creates the controllers
   CommandXboxController driverXbox = new CommandXboxController(0);
   CommandXboxController operatorXbox = new CommandXboxController(1);
 
+  // Creates the photon camera
   PhotonCamera camera = new PhotonCamera(Constants.Vision.kCameraName);
 
   public RobotContainer() {
@@ -48,17 +50,16 @@ public class RobotContainer {
     // Register the commands for FRC PathPlanner
     NamedCommands.registerCommand("Raise Arm", armbase.ArmCommand(.3).withTimeout(2));
     NamedCommands.registerCommand("Lower Arm", armbase.ArmCommand(-.3).withTimeout(2));
-    NamedCommands.registerCommand("Move To Setpoint", armbase.moveToSetpoint(.3, 28).withTimeout(2));
+    NamedCommands.registerCommand("Move To Setpoint", armbase.moveToSetpoint(.3, 18).withTimeout(2));
     NamedCommands.registerCommand("Shoot High", intakebase.ShootCommand(1, .7, 1).withTimeout(3));
     NamedCommands.registerCommand("Shoot Low", intakebase.ShootCommand(.5, .3, 1).withTimeout(3));
     NamedCommands.registerCommand("Aim at Note", drivebase.aimAtTarget(camera).withTimeout(2));
     NamedCommands.registerCommand("Intake Note",intakebase.IntakeWithSensor(.7));
     NamedCommands.registerCommand("Arm Encoder Up", new InstantCommand(armbase::ArmEncoderUp));
+    NamedCommands.registerCommand("Reset IMU", new InstantCommand(drivebase::zeroGyro));
 
     autoChooser = AutoBuilder.buildAutoChooser(); // Builds auton sendable chooser for pathplanner.
     SmartDashboard.putData(autoChooser);  // Sends autoBuilder to smartdashboard.
-
-    CameraServer.startAutomaticCapture().setResolution(480, 320);
 
     // Creating the robot centric swerve drive
     Command closedDrive = drivebase.driveCommand(false, 
@@ -78,32 +79,34 @@ public class RobotContainer {
 
     drivebase.setDefaultCommand(fieldDrive); // Set default drive command to field centric drive
 
+    // Driver Controls
     driverXbox.leftTrigger(.3).toggleOnTrue(closedDrive); // Toggle robot centric swerve drive
     driverXbox.start().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());    // Lock drive train to limit pushing
     driverXbox.back().onTrue(new InstantCommand(drivebase::zeroGyro)); // Zero the gyro to avoid odd drive due to gyro drift
     //driverXbox.rightTrigger(.3).whileTrue(drivebase.aimAtTarget(camera)); // Look at the note
+
     driverXbox.y().whileTrue(Commands.deferredProxy(() -> drivebase.driveToPose // Drive to position on field
     (new Pose2d(new Translation2d(1.47, 5.55), Rotation2d.fromDegrees(90)))));
 
-    driverXbox.rightTrigger(.3).whileTrue(drivebase.aimAtTargetNew(camera, 
+    driverXbox.rightTrigger(.3).whileTrue(drivebase.aimAtTargetNew(camera,  // Vision track
     () -> MathUtil.applyDeadband(-driverXbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND), 
     () -> MathUtil.applyDeadband(-driverXbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND)));
 
-
+    // Operator Controls
     operatorXbox.y().whileTrue(armbase.ArmCommand(.4)); // Raise the arm
     operatorXbox.a().whileTrue(armbase.ArmCommand(-.4));  // Lower the arm
     operatorXbox.b().whileTrue(intakebase.IntakeCommand(-.3));  // Outtake the note
     operatorXbox.leftBumper().whileTrue(intakebase.IntakeWithSensor(.6));  // Intake the note
     operatorXbox.x().whileTrue(intakebase.ShootCommand(.6, .5, .2)); // Spit the note into the amp
     operatorXbox.rightBumper().whileTrue(intakebase.ShootCommand(1, .7, 1));  // Shoot the note into the speaker
-    operatorXbox.start().whileTrue(climbbase.climberCommand(.8)); // Spin the climb motor forwards.
-    operatorXbox.back().whileTrue(climbbase.climberCommand(-.8)); // Spin the climb motor in reverse.
-    operatorXbox.pov(0).whileTrue(armbase.moveToSetpoint(.3, 28));  // Move the arm to setpoint // When held will oscillate around setpoint
+    operatorXbox.start().whileTrue(climbbase.climberUp(1)); // Spin the climb motor forwards.
+    operatorXbox.back().whileTrue(climbbase.climberDown(1)); // Spin the climb motor in reverse.
+    operatorXbox.pov(0).whileTrue(armbase.moveToSetpoint(.3, 18));  // Move the arm to setpoint // When held will oscillate around setpoint
   }
 
   public void configureBindings() {}
 
   public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
+    return autoChooser.getSelected(); // Gets Auton
   }
 }
