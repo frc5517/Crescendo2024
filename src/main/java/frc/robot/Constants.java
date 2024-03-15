@@ -69,6 +69,12 @@ public final class Constants
     public static final int shooterMotorPort= 11; // brushed shooter motor with spark max
     public static final int leftArmMotorPort = 12; // brushless arm motor with spark max
     public static final int rightArmMotorPort = 13; // brushless arm motor with spark max
+
+    public static final double armP = 0.0;
+    public static final double armI = 0.0;
+    public static final double armD = 0.0;
+    public static final double armMaxOutput = 0.4;
+    public static final double armMinOutput = 0.0;
   }
 
   public static class ClimberConstants {

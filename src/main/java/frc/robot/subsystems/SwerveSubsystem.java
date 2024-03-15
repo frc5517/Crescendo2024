@@ -147,7 +147,7 @@ public class SwerveSubsystem extends SubsystemBase
       if (result.hasTargets()) {
         swerveDrive.drive(new Translation2d(Math.pow(translationX.getAsDouble(), 3) * (swerveDrive.getMaximumVelocity()),
                                           Math.pow(translationY.getAsDouble(), 3) * (swerveDrive.getMaximumVelocity())),
-                        Math.pow(-result.getBestTarget().getYaw(), 3) * (swerveDrive.getMaximumAngularVelocity()),
+                        Math.pow(result.getBestTarget().getYaw(), 3) * (swerveDrive.getMaximumAngularVelocity()),
                         false,
                         false);
       }
