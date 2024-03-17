@@ -30,7 +30,7 @@ public class ClimberSubsystem extends SubsystemBase {
 
   public Command climberUp(double speed) {
     return runEnd(() -> {
-      climberMoter.set(speed);
+      climberMoter.set(-speed);
     }, () -> {
       climberMoter.stopMotor();
     });
@@ -41,7 +41,7 @@ public class ClimberSubsystem extends SubsystemBase {
       if (climbLimit.get()) { // If climber is going down and limit switch is hit stop climber.
         climberMoter.stopMotor();
       } else {  // Else go down as usual.
-        climberMoter.set(-speed);
+        climberMoter.set(speed);
       }
     }, () -> {
       climberMoter.stopMotor();

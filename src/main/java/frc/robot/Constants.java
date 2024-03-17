@@ -57,9 +57,9 @@ public final class Constants
   public static class OperatorConstants
   {
     // Joystick Deadband
-    public static final double LEFT_X_DEADBAND  = 0.1;
-    public static final double LEFT_Y_DEADBAND  = 0.1;
-    public static final double RIGHT_X_DEADBAND = 0.1;
+    public static final double LEFT_X_DEADBAND  = 0.05;
+    public static final double LEFT_Y_DEADBAND  = 0.05;
+    public static final double RIGHT_X_DEADBAND = 0.05;
     public static final double TURN_CONSTANT    = 6;
   }
 
@@ -70,11 +70,11 @@ public final class Constants
     public static final int leftArmMotorPort = 12; // brushless arm motor with spark max
     public static final int rightArmMotorPort = 13; // brushless arm motor with spark max
 
-    public static final double armP = 0.0;
+    public static final double armP = 0.8;
     public static final double armI = 0.0;
     public static final double armD = 0.0;
     public static final double armMaxOutput = 0.4;
-    public static final double armMinOutput = 0.0;
+    public static final double armMinOutput = -0.4;
   }
 
   public static class ClimberConstants {

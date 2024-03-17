@@ -3,52 +3,34 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.477971343959805,
-        "y": 5.574358195791997
+        "x": 1.4437834806867724,
+        "y": 5.57998439840296
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.4779713439598052,
-        "y": 5.574358195791997
+        "x": 1.472998058688882,
+        "y": 7.001760527838968
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "front speaker start"
     },
     {
       "anchor": {
-        "x": 4.0,
-        "y": 6.0
+        "x": 2.962941536796478,
+        "y": 7.030975105841078
       },
       "prevControl": {
-        "x": 3.0,
-        "y": 6.0
+        "x": 1.472998058688882,
+        "y": 7.021236913173707
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "3rd note end"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
-  "eventMarkers": [
-    {
-      "name": "New Event Marker",
-      "waypointRelativePos": 0,
-      "command": {
-        "type": "sequential",
-        "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "Move To Setpoint"
-              }
-            }
-          ]
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -57,7 +39,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0,
+    "rotation": 0.0,
     "rotateFast": false
   },
   "reversed": false,

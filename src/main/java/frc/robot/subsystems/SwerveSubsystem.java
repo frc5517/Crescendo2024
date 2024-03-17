@@ -135,7 +135,7 @@ public class SwerveSubsystem extends SubsystemBase
       {
         drive(getTargetSpeeds(0,
                               0,
-                              Rotation2d.fromDegrees(-result.getBestTarget()
+                              Rotation2d.fromDegrees(result.getBestTarget()
                                                            .getYaw())));
       }
     });

@@ -1,0 +1,52 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.94649899620084,
+        "y": 5.57998439840296
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.3299590134174344,
+        "y": 5.589722591070332
+      },
+      "isLocked": false,
+      "linkedName": "score 2 end"
+    },
+    {
+      "anchor": {
+        "x": 1.4437834806867724,
+        "y": 5.57998439840296
+      },
+      "prevControl": {
+        "x": 2.885035995457519,
+        "y": 5.570246205735591
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "front speaker start"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": null,
+  "previewStartingState": {
+    "rotation": 0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}

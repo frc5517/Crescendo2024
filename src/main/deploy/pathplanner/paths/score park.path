@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.4662605074140238,
-        "y": 5.58606903233778
+        "x": 1.4437834806867724,
+        "y": 5.57998439840296
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.4662605074140247,
-        "y": 5.58606903233778
+        "x": 1.4535216733541423,
+        "y": 6.446683545798883
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "front speaker start"
     },
     {
       "anchor": {
-        "x": 3.503946066380006,
-        "y": 5.58606903233778
+        "x": 3.7419969501860715,
+        "y": 6.281134270453595
       },
       "prevControl": {
-        "x": 2.503946066380006,
-        "y": 5.58606903233778
+        "x": 2.7419969501860715,
+        "y": 6.281134270453595
       },
       "nextControl": null,
       "isLocked": false,
@@ -32,7 +32,7 @@
   "constraintZones": [],
   "eventMarkers": [
     {
-      "name": "move and shoot",
+      "name": "New Event Marker",
       "waypointRelativePos": 0,
       "command": {
         "type": "sequential",
@@ -42,12 +42,6 @@
               "type": "named",
               "data": {
                 "name": "Move To Setpoint"
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "Shoot High"
               }
             }
           ]

@@ -12,23 +12,28 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ManipulatorConstants;
 
-public class PIDArmSubsystem extends SubsystemBase {
+public class ArmSubsytem extends SubsystemBase {
   /** Creates a new PIDArmSubsystem. */
   CANSparkMax leftMotor = new CANSparkMax(ManipulatorConstants.leftArmMotorPort, MotorType.kBrushless);
   CANSparkMax rightMotor = new CANSparkMax(ManipulatorConstants.rightArmMotorPort, MotorType.kBrushless);
-  SparkPIDController armController = leftMotor.getPIDController();
-  RelativeEncoder armEncoder = leftMotor.getEncoder();
+  SparkPIDController armController;
+  RelativeEncoder armEncoder;
 
   DigitalInput topLimit = new DigitalInput(0);
   DigitalInput bottomLimit = new DigitalInput(1);
 
-  public PIDArmSubsystem() {
+  public ArmSubsytem() {
     leftMotor.setIdleMode(IdleMode.kBrake);
     rightMotor.setIdleMode(IdleMode.kBrake);
+
+    armEncoder = leftMotor.getEncoder();
+    armController = leftMotor.getPIDController();
+    armController.setPositionPIDWrappingEnabled(true);
 
     rightMotor.follow(leftMotor, true);
 
@@ -49,7 +54,6 @@ public class PIDArmSubsystem extends SubsystemBase {
         if (bottomLimit.get()) {  // We are going down and bottom limit is tripped so stop
             leftMotor.stopMotor();
         } else {  // We are going down but bottom limit is not tripped so go at commanded speed
-            leftMotor.set(speed);
             armController.setReference(speed, ControlType.kDutyCycle);
         } 
       }
@@ -61,7 +65,6 @@ public class PIDArmSubsystem extends SubsystemBase {
 
   public Command MoveToSetpoint(double setpoint) {
     return runEnd(() -> {
-
       if (leftMotor.getAppliedOutput() > 0) {
         if (topLimit.get()) { // We are going up and top limit is tripped so stop
             leftMotor.stopMotor();
@@ -92,5 +95,6 @@ public class PIDArmSubsystem extends SubsystemBase {
       } else if (bottomLimit.get()) {  // We are going down and bottom limit is tripped so set position
           armEncoder.setPosition(0);
       } else {} // If neither do nothing
+      SmartDashboard.putNumber("PID Arm Encoder", armEncoder.getPosition());
   }
 }

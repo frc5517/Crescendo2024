@@ -25,7 +25,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
   ColorSensorV3 colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
   ColorMatch colorMatch = new ColorMatch();
-  Color noteColor = new Color(.559, .354, .087);
+  Color noteColor = new Color(.550, .366, .083);
   Boolean detected = false;
   String matchedString = "No Note";
 
@@ -56,6 +56,9 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     SmartDashboard.putString("Note Sensor", matchedString); // Put data to dashboard. 
+    SmartDashboard.putNumber("Red", detectedColor.red);
+    SmartDashboard.putNumber("Green", detectedColor.green);
+    SmartDashboard.putNumber("Blue", detectedColor.blue);
   }
 
   /**

@@ -1,0 +1,141 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.44,
+      "y": 5.58
+    },
+    "rotation": 0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "Arm Encoder Up"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Move To Setpoint"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot High"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Lower Arm"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "back up intake note"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake Note"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "realign to score"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Move To Setpoint"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot High"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "3rd note intake"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake Note"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "realign 3rd note"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Move To Setpoint"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot High"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "back up intake note"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}
