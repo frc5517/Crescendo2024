@@ -40,7 +40,23 @@ public class ArmSubsytem extends SubsystemBase {
     armController.setP(ManipulatorConstants.armP);
     armController.setI(ManipulatorConstants.armI);
     armController.setD(ManipulatorConstants.armD);
+    armController.setFF(ManipulatorConstants.armFF);
     armController.setOutputRange(ManipulatorConstants.armMinOutput, ManipulatorConstants.armMaxOutput);
+    leftMotor.burnFlash();
+  }
+
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run
+      if (topLimit.get()) { // We are going up and top limit is tripped so set position
+          armEncoder.setPosition(82);
+      } else if (bottomLimit.get()) {  // We are going down and bottom limit is tripped so set position
+          armEncoder.setPosition(0);
+      } else {} // If neither do nothing
+      SmartDashboard.putNumber("Arm Encoder Value", armEncoder.getPosition());
+      SmartDashboard.putNumber("Arm Rotation Value", armEncoder.getPosition() * (1/2.25));
+      SmartDashboard.putBoolean("Top Arm Limit", topLimit.get());
+      SmartDashboard.putBoolean("Bottom Arm Limit", bottomLimit.get());
   }
 
   public Command ArmCommand(double speed) {
@@ -48,18 +64,20 @@ public class ArmSubsytem extends SubsystemBase {
       if (speed > 0) {
         if (topLimit.get()) { // We are going up and top limit is tripped so stop
             leftMotor.stopMotor();
+            armEncoder.setPosition(82);
         } else {  // We are going up but top limit is not tripped so go at commanded speed
             armController.setReference(speed, ControlType.kDutyCycle);
         } } else {
         if (bottomLimit.get()) {  // We are going down and bottom limit is tripped so stop
             leftMotor.stopMotor();
+            armEncoder.setPosition(0);
         } else {  // We are going down but bottom limit is not tripped so go at commanded speed
             armController.setReference(speed, ControlType.kDutyCycle);
         } 
       }
     }, () -> {
-      leftMotor.stopMotor();
-      rightMotor.stopMotor();
+        leftMotor.stopMotor();
+        rightMotor.stopMotor();
     });
   }
 
@@ -68,33 +86,24 @@ public class ArmSubsytem extends SubsystemBase {
       if (leftMotor.getAppliedOutput() > 0) {
         if (topLimit.get()) { // We are going up and top limit is tripped so stop
             leftMotor.stopMotor();
+            armEncoder.setPosition(82);
         } else {  // We are going up but top limit is not tripped so go at commanded speed
             armController.setReference(setpoint, ControlType.kPosition);
         } } else {
         if (bottomLimit.get()) {  // We are going down and bottom limit is tripped so stop
             leftMotor.stopMotor();
+            armEncoder.setPosition(0);
         } else {  // We are going down but bottom limit is not tripped so go at commanded speed
             armController.setReference(setpoint, ControlType.kPosition);
         } 
       }
     }, () -> {
-      leftMotor.stopMotor();
-      rightMotor.stopMotor();
+        leftMotor.stopMotor();
+        rightMotor.stopMotor();
     });
   }
 
   public void ArmEncoderUp() {
-    armEncoder.setPosition(90);
-  }
-
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-      if (topLimit.get()) { // We are going up and top limit is tripped so set position
-          armEncoder.setPosition(90);
-      } else if (bottomLimit.get()) {  // We are going down and bottom limit is tripped so set position
-          armEncoder.setPosition(0);
-      } else {} // If neither do nothing
-      SmartDashboard.putNumber("PID Arm Encoder", armEncoder.getPosition());
+    armEncoder.setPosition(82);
   }
 }

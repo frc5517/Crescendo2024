@@ -61,33 +61,66 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "realign to score"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "realign to score"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Outdex Slightly"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "named",
+          "type": "deadline",
           "data": {
-            "name": "Move To Setpoint"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot High"
+            "commands": [
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 1.0
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Shoot High"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Move To Setpoint"
+                }
+              }
+            ]
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "back up intake note"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Reset IMU"
           }
         }
       ]

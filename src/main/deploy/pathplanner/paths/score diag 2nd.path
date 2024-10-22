@@ -3,29 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.7315580594071305,
-        "y": 0.7963368851131419
-      },
-      "prevControl": null,
-      "nextControl": {
-        "x": 5.209366158558324,
-        "y": 0.8395822399969136
-      },
-      "isLocked": false,
-      "linkedName": "diag start intake "
-    },
-    {
-      "anchor": {
         "x": 2.8364283832704595,
         "y": 0.9485777602083012
       },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.6302122190549644,
+        "y": 1.3701678758564357
+      },
+      "isLocked": false,
+      "linkedName": "diag start end"
+    },
+    {
+      "anchor": {
+        "x": 1.19,
+        "y": 1.87
+      },
       "prevControl": {
-        "x": 5.689510456935365,
-        "y": 0.9626085370899631
+        "x": 1.4954057512642147,
+        "y": 1.3066326295915023
+      },
+      "nextControl": {
+        "x": 0.7753211512129142,
+        "y": 2.634938222800839
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 0.7518994781213513,
+        "y": 4.2978770123018135
+      },
+      "prevControl": {
+        "x": 0.8455861704876034,
+        "y": 2.9979741557200663
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "diag start end"
+      "linkedName": "Right Speaker Start"
     }
   ],
   "rotationTargets": [],
@@ -39,7 +55,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0,
+    "rotation": -61.78264414527073,
     "rotateFast": false
   },
   "reversed": false,

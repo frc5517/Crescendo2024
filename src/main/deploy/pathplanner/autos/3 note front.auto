@@ -18,33 +18,47 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Move To Setpoint"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot High"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Lower Arm"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Move To Setpoint"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Shoot High"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         },
         {
           "type": "parallel",
           "data": {
             "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Lower Arm"
+                }
+              },
               {
                 "type": "path",
                 "data": {
@@ -61,27 +75,47 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "realign to score"
-          }
-        },
-        {
           "type": "named",
           "data": {
-            "name": "Move To Setpoint"
+            "name": "Outdex Slightly"
           }
         },
         {
-          "type": "wait",
+          "type": "parallel",
           "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot High"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "realign to score"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Move To Setpoint"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.75
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Shoot High"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         },
         {
@@ -95,42 +129,75 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "Intake Note"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Intake Note"
+                      }
+                    }
+                  ]
                 }
               }
             ]
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "realign 3rd note"
-          }
-        },
-        {
           "type": "named",
           "data": {
-            "name": "Move To Setpoint"
+            "name": "Outdex Slightly"
           }
         },
         {
-          "type": "wait",
+          "type": "parallel",
           "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot High"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "back up intake note"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "realign 3rd note"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Move To Setpoint"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 1.0
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Shoot High"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Reset IMU"
+                }
+              }
+            ]
           }
         }
       ]

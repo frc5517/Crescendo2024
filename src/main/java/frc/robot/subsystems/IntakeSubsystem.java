@@ -12,7 +12,6 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,7 +28,6 @@ public class IntakeSubsystem extends SubsystemBase {
   Boolean detected = false;
   String matchedString = "No Note";
 
-
   /**
    * Initialize {@link IntakeSubsystem} with idle modes.
    */
@@ -42,23 +40,11 @@ public class IntakeSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    Color detectedColor = colorSensor.getColor(); // Get color sensor data. 
-    ColorMatchResult matchedColor = colorMatch.matchColor(detectedColor); // Checks if note color is detected. 
-    
-    if (colorMatch.matchColor(detectedColor) != null) { // If no matched color don't run. 
-      if (matchedColor.color == noteColor) {  // If matched color equals the note color detected, change values to note detected. 
-        matchedString = "Note Matched";
-        detected = true;
-      } 
-    } else {  // else set to no note values. 
-        matchedString = "No Note";
-        detected = false;
-    }
-
+    /* 
     SmartDashboard.putString("Note Sensor", matchedString); // Put data to dashboard. 
     SmartDashboard.putNumber("Red", detectedColor.red);
     SmartDashboard.putNumber("Green", detectedColor.green);
-    SmartDashboard.putNumber("Blue", detectedColor.blue);
+    SmartDashboard.putNumber("Blue", detectedColor.blue);  */
   }
 
   /**
@@ -84,14 +70,41 @@ public class IntakeSubsystem extends SubsystemBase {
   public Command IntakeWithSensor(Double speed)
   {
     return runEnd(() -> { 
-      if (detected == false) {  // if theres no note allow intake to run otherwise stop intake
-        intakeMotor.set(speed);
-      }
-      else {
+    Color detectedColor = colorSensor.getColor(); // Get color sensor data. 
+    ColorMatchResult matchedColor = colorMatch.matchColor(detectedColor); // Checks if note color is detected. 
+
+      if (colorMatch.matchColor(detectedColor) != null) { // If no matched color don't run. 
+      if (matchedColor.color == noteColor) {  // If matched color equals the note color detected, change values to note detected. 
         intakeMotor.stopMotor();
-      }
+      } 
+    } else {  // else set to no note values. 
+        intakeMotor.set(speed);
+    }
     }, () -> {
       intakeMotor.stopMotor(); // stop motor when done.
+    }
+   );
+  }
+
+  public Command IntakeBackOut(Double speed)
+  {
+    return runEnd(() -> { 
+    Color detectedColor = colorSensor.getColor(); // Get color sensor data. 
+    ColorMatchResult matchedColor = colorMatch.matchColor(detectedColor); // Checks if note color is detected. 
+
+      if (colorMatch.matchColor(detectedColor) != null) { // If no matched color don't run. 
+      if (matchedColor.color == noteColor) {  // If matched color equals the note color detected, change values to note detected. 
+        intakeMotor.stopMotor();
+        Timer.delay(.2);
+        intakeMotor.set(speed/2);
+        Timer.delay(.2);
+        intakeMotor.stopMotor();
+      } 
+    } else {  // else set to no note values. 
+        intakeMotor.set(speed);
+    }
+    }, () -> {
+      intakeMotor.stopMotor();
     }
    );
   }

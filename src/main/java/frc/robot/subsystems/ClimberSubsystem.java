@@ -16,10 +16,10 @@ import frc.robot.Constants.ClimberConstants;
 
 public class ClimberSubsystem extends SubsystemBase {
   /** Creates a new ClimberSubsystem. */
-  CANSparkMax climberMoter = new CANSparkMax(ClimberConstants.climberMotorPort, MotorType.kBrushless);
+  CANSparkMax climbMoter = new CANSparkMax(ClimberConstants.climberMotorPort, MotorType.kBrushless);
   DigitalInput climbLimit = new DigitalInput(2);
   public ClimberSubsystem() {
-    climberMoter.setIdleMode(IdleMode.kBrake);
+    climbMoter.setIdleMode(IdleMode.kBrake);
   }
 
   @Override
@@ -28,24 +28,18 @@ public class ClimberSubsystem extends SubsystemBase {
     SmartDashboard.putBoolean("Climber Limit", climbLimit.get());
   }
 
-  public Command climberUp(double speed) {
+  public Command ClimbCommand(double speed) {
     return runEnd(() -> {
-      climberMoter.set(-speed);
+      if (speed < 0) {
+        if (climbLimit.get()) { // We are going up and top limit is tripped so stop
+            climbMoter.stopMotor();
+        } else {  // We are going up but top limit is not tripped so go at commanded speed
+            climbMoter.set(speed);
+        } } else {
+          climbMoter.set(speed);
+        } 
     }, () -> {
-      climberMoter.stopMotor();
+      climbMoter.stopMotor();
     });
   }
-
-  public Command climberDown(double speed) {
-    return runEnd(() -> {
-      if (climbLimit.get()) { // If climber is going down and limit switch is hit stop climber.
-        climberMoter.stopMotor();
-      } else {  // Else go down as usual.
-        climberMoter.set(speed);
-      }
-    }, () -> {
-      climberMoter.stopMotor();
-    });
-  }
-
 }
