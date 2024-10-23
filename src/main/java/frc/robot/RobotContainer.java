@@ -15,7 +15,6 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.util.PixelFormat;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -86,36 +85,30 @@ public class RobotContainer {
 
     drivebase.setDefaultCommand(fieldDrive); // Set default drive command to field centric drive
 
-    driverXbox.rightTrigger().whileTrue(drivebase.aimAtTarget(camera));
-
     // Driver Controls
     driverXbox.leftTrigger(.3).toggleOnTrue(closedDrive); // Toggle robot centric swerve drive
     driverXbox.start().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());    // Lock drive train to limit pushing
     driverXbox.back().onTrue(new InstantCommand(drivebase::zeroGyro)); // Zero the gyro to avoid odd drive due to gyro drift
-    //driverXbox.rightTrigger(.3).whileTrue(drivebase.aimAtTarget(camera)); // Look at the note
+    driverXbox.a().whileTrue(drivebase.aimAtSpeaker(2)); // Aim at speaker
+    driverXbox.rightTrigger(.3).whileTrue(drivebase.aimAtTarget(camera)); // Look at the note
 
-    driverXbox.a().whileTrue(Commands.deferredProxy(() -> drivebase.driveToPose // Drive to position on field
-    (new Pose2d(new Translation2d(1.47, 5.55), Rotation2d.fromDegrees(90)))));
-
-    driverXbox.a().whileTrue(Commands.deferredProxy(() -> drivebase.driveToPose // Drive to position on field
-    (new Pose2d(new Translation2d(14.9, 6.5), Rotation2d.fromDegrees(60)))));
-
-    //driverXbox.rightTrigger(.3).whileTrue(drivebase.aimAtTargetNew(camera,  // Vision track
-    //() -> MathUtil.applyDeadband(-driverXbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND), 
-    //() -> MathUtil.applyDeadband(-driverXbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND)));
-    //driverXbox.rightTrigger(.3).whileTrue(drivebase.aimAtTarget(camera));
 
     // Operator Controls
     operatorXbox.y().whileTrue(armbase.ArmCommand(.3));  // Raise the arm
     operatorXbox.a().whileTrue(armbase.ArmCommand(-.3)); // Lower the arm
     operatorXbox.b().whileTrue(intakebase.IntakeCommand(-.3));  // Outtake the note
-    operatorXbox.leftBumper().whileTrue(intakebase.IntakeWithSensor(.6));  // Intake the note
-    //operatorXbox.leftBumper().whileTrue(intakebase.IntakeBackOut(.6));
+    operatorXbox.leftBumper().whileTrue(intakebase.IntakeCommand(.6)); // Intake, no longer using sensor.
     operatorXbox.x().whileTrue(intakebase.ShootCommand(.6, .5, .2)); // Spit the note into the amp
     operatorXbox.rightBumper().whileTrue(intakebase.ShootCommand(1, .7, .7));  // Shoot the note into the speaker
     operatorXbox.start().whileTrue(climbbase.ClimbCommand(1)); // Spin the climb motor forwards.
     operatorXbox.back().whileTrue(climbbase.ClimbCommand(-1)); // Spin the climb motor in reverse. 
     operatorXbox.pov(0).whileTrue(armbase.MoveToSetpoint(6)); // Move the arm to setpoint // When held will oscillate around setpoint
+
+    if (Robot.isSimulation())
+      driverXbox.start().onTrue(Commands.runOnce(
+              () -> drivebase.resetOdometry(new Pose2d(3, 3, new Rotation2d()))
+      ));
+
   }
 
   public void configureBindings() {}
