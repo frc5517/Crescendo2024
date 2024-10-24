@@ -47,7 +47,7 @@ public class RobotContainer {
   CommandXboxController operatorXbox = new CommandXboxController(1);
 
   // Creates the photon camera
-  PhotonCamera camera = new PhotonCamera("Camera");
+  //PhotonCamera camera = new PhotonCamera("Camera");
 
   public RobotContainer() {
     configureBindings();
@@ -86,7 +86,7 @@ public class RobotContainer {
 
     drivebase.setDefaultCommand(fieldDrive); // Set default drive command to field centric drive
 
-    driverXbox.rightTrigger().whileTrue(drivebase.aimAtTarget(camera));
+    driverXbox.rightTrigger().whileTrue(drivebase.aimAtTarget());
 
     // Driver Controls
     driverXbox.leftTrigger(.3).toggleOnTrue(closedDrive); // Toggle robot centric swerve drive

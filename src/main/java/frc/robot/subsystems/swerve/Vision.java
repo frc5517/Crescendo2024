@@ -269,6 +269,14 @@ public class Vision
     return Robot.isReal() ? camera.camera.getLatestResult() : camera.cameraSim.getCamera().getLatestResult();
   }
 
+  public PhotonTrackedTarget getTarget() {
+    return Cameras.CENTER_CAM.camera.getLatestResult().getBestTarget();
+  }
+
+  public boolean hasTarget() { 
+    return Cameras.CENTER_CAM.camera.getLatestResult().hasTargets();
+  }
+
   /**
    * Get distance of the robot from the AprilTag pose.
    *
@@ -478,6 +486,7 @@ public class Vision
 //        cameraSim.enableDrawWireframe(true);
       }
     }
+    
   }
 
 }

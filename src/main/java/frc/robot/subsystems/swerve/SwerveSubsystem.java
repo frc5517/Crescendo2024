@@ -10,8 +10,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import org.photonvision.PhotonCamera;
-import org.photonvision.targeting.PhotonPipelineResult;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathConstraints;
@@ -69,7 +67,7 @@ public class SwerveSubsystem extends SubsystemBase
   /**
    * Enable vision odometry updates while driving.
    */
-  private final boolean visionDriveTest = false;
+  private final boolean visionDriveTest = true;
 
   public double maxSpeed;
 
@@ -243,17 +241,15 @@ public class SwerveSubsystem extends SubsystemBase
    * @param camera {@link PhotonCamera} to communicate with.
    * @return A {@link Command} which will run the alignment.
    */
-  public Command aimAtTarget(PhotonCamera camera)
+  public Command aimAtTarget()
   {
 
     return run(() -> {
-      PhotonPipelineResult result = camera.getLatestResult();
-      if (result.hasTargets())
+      if (vision.hasTarget())
       {
         drive(getTargetSpeeds(0,
                               0,
-                              Rotation2d.fromDegrees(result.getBestTarget()
-                                                           .getYaw()))); // Not sure if this will work, more math may be required.
+                              Rotation2d.fromDegrees(vision.getTarget().getYaw()))); // Not sure if this will work, more math may be required.
       }
     });
   }
