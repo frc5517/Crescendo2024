@@ -6,7 +6,6 @@ package frc.robot.subsystems.swerve;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import org.photonvision.PhotonCamera;
@@ -428,13 +427,12 @@ public class SwerveSubsystem extends SubsystemBase
    * @return Drive command.
    */
   public Command driveCommand(boolean fieldRelative, DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX
-  , BooleanSupplier lowSpeed, BooleanSupplier highSpeed)
+  , DoubleSupplier speedSlider)
   {
     return run(() -> {
       // Make the robot move
 
-      if (lowSpeed.getAsBoolean()) {maxSpeed = .4;} // .5
-      else if (highSpeed.getAsBoolean()) {maxSpeed = .6;} // 1
+      maxSpeed = ((speedSlider.getAsDouble()/2) +.5) * .7;
 
       swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
                             translationX.getAsDouble() * swerveDrive.getMaximumVelocity() * maxSpeed,

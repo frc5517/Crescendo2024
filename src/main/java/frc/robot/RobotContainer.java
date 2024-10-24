@@ -15,13 +15,14 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.util.PixelFormat;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.ArmSubsytem;
 import frc.robot.subsystems.ClimberSubsystem;
@@ -41,8 +42,17 @@ public class RobotContainer {
   
 
   // Creates the controllers
-  CommandJoystick driverStick = new CommandJoystick(0);
   CommandXboxController operatorXbox = new CommandXboxController(1);
+
+  Joystick driverStick = new Joystick(0);
+    JoystickButton 
+    button0 = new JoystickButton(driverStick, 0),
+    button1 = new JoystickButton(driverStick, 1),
+    button2 = new JoystickButton(driverStick, 2),
+    button3 = new JoystickButton(driverStick, 3),
+    button4 = new JoystickButton(driverStick, 4),
+    button5 = new JoystickButton(driverStick, 5),
+    button6 = new JoystickButton(driverStick, 6);
 
   // Creates the photon camera
   PhotonCamera camera = new PhotonCamera("Camera");
@@ -64,30 +74,29 @@ public class RobotContainer {
     autoChooser = AutoBuilder.buildAutoChooser(); // Builds auton sendable chooser for pathplanner.
     SmartDashboard.putData(autoChooser);  // Sends autoBuilder to smartdashboard.
 
-    CameraServer.startAutomaticCapture().setVideoMode(PixelFormat.kMJPEG, 480, 320, 10);
+    if (Robot.isReal()) {
+    CameraServer.startAutomaticCapture().setVideoMode(PixelFormat.kMJPEG, 480, 320, 10);}
 
     // Creating the robot centric swerve drive
     Command closedDrive = drivebase.driveCommand(false, 
-    () -> MathUtil.applyDeadband(-driverStick.getY(), OperatorConstants.LEFT_Y_DEADBAND), 
-    () -> MathUtil.applyDeadband(-driverStick.getX(), OperatorConstants.LEFT_X_DEADBAND), 
-    () -> MathUtil.applyDeadband(-driverStick.getTwist(), OperatorConstants.RIGHT_X_DEADBAND),
-    driverStick.button(0),
-    driverStick.button(1));
+    () -> MathUtil.applyDeadband(-driverStick.getRawAxis(1), OperatorConstants.LEFT_Y_DEADBAND), 
+    () -> MathUtil.applyDeadband(-driverStick.getRawAxis(0), OperatorConstants.LEFT_X_DEADBAND), 
+    () -> MathUtil.applyDeadband(-driverStick.getRawAxis(2), OperatorConstants.RIGHT_X_DEADBAND),
+    () -> -driverStick.getRawAxis(3));
 
     // Creating the field centric swerve drive
     Command fieldDrive = drivebase.driveCommand(true, 
     () -> MathUtil.applyDeadband(-driverStick.getY(), OperatorConstants.LEFT_Y_DEADBAND), 
     () -> MathUtil.applyDeadband(-driverStick.getX(), OperatorConstants.LEFT_X_DEADBAND), 
     () -> MathUtil.applyDeadband(-driverStick.getTwist(), OperatorConstants.RIGHT_X_DEADBAND),
-    driverStick.button(0),
-    driverStick.button(1));
+    () -> -driverStick.getRawAxis(3));
 
     drivebase.setDefaultCommand(fieldDrive); // Set default drive command to field centric drive
 
     // Driver Controls
-    driverStick.button(3).toggleOnTrue(closedDrive); // Toggle robot centric swerve drive
-    driverStick.button(4).whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());    // Lock drive train to limit pushing
-    driverStick.button(5).onTrue(new InstantCommand(drivebase::zeroGyro)); // Zero the gyro to avoid odd drive due to gyro drift
+    button1.toggleOnTrue(closedDrive); // Toggle robot centric swerve drive
+    button3.whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());    // Lock drive train to limit pushing
+    button4.onTrue(new InstantCommand(drivebase::zeroGyro)); // Zero the gyro to avoid odd drive due to gyro drift
 
     // Operator Controls
     operatorXbox.y().whileTrue(armbase.ArmCommand(.3));  // Raise the arm
