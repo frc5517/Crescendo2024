@@ -433,9 +433,8 @@ public class SwerveSubsystem extends SubsystemBase
     return run(() -> {
       // Make the robot move
 
-      if (lowSpeed.getAsBoolean()) {maxSpeed = .3;} // .5
-      else if (highSpeed.getAsBoolean()) {maxSpeed = .7;} // 1
-      else {maxSpeed = .5;} // .7
+      if (lowSpeed.getAsBoolean()) {maxSpeed = .4;} // .5
+      else if (highSpeed.getAsBoolean()) {maxSpeed = .6;} // 1
 
       swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
                             translationX.getAsDouble() * swerveDrive.getMaximumVelocity() * maxSpeed,
