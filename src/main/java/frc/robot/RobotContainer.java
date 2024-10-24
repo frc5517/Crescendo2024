@@ -5,17 +5,19 @@
 package frc.robot;
 
 import java.io.File;
+import java.util.List;
 
+import org.ironmaple.simulation.SimulatedArena;
+import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
-import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.util.PixelFormat;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -65,7 +67,7 @@ public class RobotContainer {
     autoChooser = AutoBuilder.buildAutoChooser(); // Builds auton sendable chooser for pathplanner.
     SmartDashboard.putData(autoChooser);  // Sends autoBuilder to smartdashboard.
 
-    CameraServer.startAutomaticCapture().setVideoMode(PixelFormat.kMJPEG, 480, 320, 10);
+    
 
     // Creating the robot centric swerve drive
     Command closedDrive = drivebase.driveCommand(false, 
@@ -83,33 +85,48 @@ public class RobotContainer {
     driverXbox.leftBumper(),  // Left bumper for slow speed
     driverXbox.rightBumper());  // Right bumper for high speed
 
-    drivebase.setDefaultCommand(fieldDrive); // Set default drive command to field centric drive
 
-    // Driver Controls
-    driverXbox.leftTrigger(.3).toggleOnTrue(closedDrive); // Toggle robot centric swerve drive
-    driverXbox.start().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());    // Lock drive train to limit pushing
-    driverXbox.back().onTrue(new InstantCommand(drivebase::zeroGyro)); // Zero the gyro to avoid odd drive due to gyro drift
-    driverXbox.a().whileTrue(drivebase.aimAtSpeaker(2)); // Aim at speaker
-    driverXbox.rightTrigger(.3).whileTrue(drivebase.aimAtTarget(camera)); // Look at the note
+    if (Robot.isSimulation()) {
+      // Initialize some things for sim
+      SimulatedArena.getInstance().resetFieldForAuto(); // Resets field (places notes onto the field)
+      drivebase.setDefaultCommand(fieldDrive); // Set default drive command to field centric during sim
 
+      // Set controls for simulation
+      driverXbox.start().onTrue(Commands.runOnce( // Moves the robot onto the field during simulation
+        () -> drivebase.resetOdometry(new Pose2d(3, 3, new Rotation2d()))));
 
-    // Operator Controls
-    operatorXbox.y().whileTrue(armbase.ArmCommand(.3));  // Raise the arm
-    operatorXbox.a().whileTrue(armbase.ArmCommand(-.3)); // Lower the arm
-    operatorXbox.b().whileTrue(intakebase.IntakeCommand(-.3));  // Outtake the note
-    operatorXbox.leftBumper().whileTrue(intakebase.IntakeCommand(.6)); // Intake, no longer using sensor.
-    operatorXbox.x().whileTrue(intakebase.ShootCommand(.6, .5, .2)); // Spit the note into the amp
-    operatorXbox.rightBumper().whileTrue(intakebase.ShootCommand(1, .7, .7));  // Shoot the note into the speaker
-    operatorXbox.start().whileTrue(climbbase.ClimbCommand(1)); // Spin the climb motor forwards.
-    operatorXbox.back().whileTrue(climbbase.ClimbCommand(-1)); // Spin the climb motor in reverse. 
-    operatorXbox.pov(0).whileTrue(armbase.MoveToSetpoint(6)); // Move the arm to setpoint // When held will oscillate around setpoint
+    } else {
+      // Set some things for real
+      drivebase.setDefaultCommand(fieldDrive); // Set default drive command to field centric drive
 
-    if (Robot.isSimulation())
-      driverXbox.start().onTrue(Commands.runOnce(
-              () -> drivebase.resetOdometry(new Pose2d(3, 3, new Rotation2d()))
-      ));
+      // Driver Controls
+          driverXbox.leftTrigger(.3).toggleOnTrue(closedDrive); // Toggle robot centric swerve drive
+          driverXbox.start().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());    // Lock drive train to limit pushing
+          driverXbox.back().onTrue(new InstantCommand(drivebase::zeroGyro)); // Zero the gyro to avoid odd drive due to gyro drift
+          driverXbox.a().whileTrue(drivebase.aimAtSpeaker(2)); // Aim at speaker
 
+      // Operator Controls
+          operatorXbox.y().whileTrue(armbase.ArmCommand(.3));  // Raise the arm
+          operatorXbox.a().whileTrue(armbase.ArmCommand(-.3)); // Lower the arm
+          operatorXbox.b().whileTrue(intakebase.IntakeCommand(-.3));  // Outtake the note
+          operatorXbox.leftBumper().whileTrue(intakebase.IntakeCommand(.6)); // Intake, no longer using sensor.
+          operatorXbox.x().whileTrue(intakebase.ShootCommand(.6, .5, .2)); // Spit the note into the amp
+          operatorXbox.rightBumper().whileTrue(intakebase.ShootCommand(1, .7, .7));  // Shoot the note into the speaker
+          operatorXbox.start().whileTrue(climbbase.ClimbCommand(1)); // Spin the climb motor forwards.
+          operatorXbox.back().whileTrue(climbbase.ClimbCommand(-1)); // Spin the climb motor in reverse. 
+          operatorXbox.pov(0).whileTrue(armbase.MoveToSetpoint(6)); // Move the arm to setpoint // When held will oscillate around setpoint
+
+    }
   }
+
+  /**
+   * Method used to update simulation and push the game piece to AdvantageScope
+   */
+  public void updateSimulationField() {
+      SimulatedArena.getInstance().simulationPeriodic();
+      final List<Pose3d> notes = SimulatedArena.getInstance().getGamePiecesByType("Note");
+      if (notes != null) Logger.recordOutput("FieldSimulation/Notes", notes.toArray(Pose3d[]::new));
+    }
 
   public void configureBindings() {}
 

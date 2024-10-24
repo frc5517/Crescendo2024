@@ -1,6 +1,7 @@
 package swervelib.simulation;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -10,6 +11,8 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Logger;
 
 public class SwerveSimulationObjectsContainer {
     protected static DCMotor
@@ -94,6 +97,7 @@ public class SwerveSimulationObjectsContainer {
                 new Pose2d(3, 3, new Rotation2d())
         );
         SimulatedArena.getInstance().addDriveTrainSimulation(instance);
+        SimulatedArena.getInstance().placeGamePiecesOnField();
 
         return getInstance();
     }
