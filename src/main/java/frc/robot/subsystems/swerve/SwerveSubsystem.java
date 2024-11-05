@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-import org.photonvision.PhotonCamera;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathConstraints;
@@ -30,6 +29,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
 import frc.robot.Constants.AutonConstants;
+import frc.robot.subsystems.swerve.Vision.Cameras;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
 import swervelib.SwerveDriveTest;
@@ -141,7 +142,10 @@ public class SwerveSubsystem extends SubsystemBase
 
   @Override
   public void periodic()
-  {
+  { 
+    if (vision.getLatestResult(Cameras.CENTER_CAM).hasTargets()) {
+    SmartDashboard.putNumber("Target Yaw", vision.getLatestResult(Cameras.CENTER_CAM).getBestTarget().getYaw());
+    }
     // When vision is enabled we must manually update odometry in SwerveDrive
     if (visionDriveTest)
     {
@@ -215,6 +219,10 @@ public class SwerveSubsystem extends SubsystemBase
     return new Rotation2d(relativeTrl.getX(), relativeTrl.getY()).plus(swerveDrive.getOdometryHeading());
   }
 
+  public Rotation2d getTargetYaw() {
+    return new Rotation2d(vision.getLatestResult(Cameras.CENTER_CAM).getBestTarget().getYaw());
+  }
+
   /**
    * Aim the robot at the speaker.
    *
@@ -238,20 +246,20 @@ public class SwerveSubsystem extends SubsystemBase
   /**
    * Aim the robot at the target returned by PhotonVision.
    *
-   * @param camera {@link PhotonCamera} to communicate with.
    * @return A {@link Command} which will run the alignment.
    */
-  public Command aimAtTarget()
-  {
-
-    return run(() -> {
-      if (vision.hasTarget())
-      {
-        drive(getTargetSpeeds(0,
-                              0,
-                              Rotation2d.fromDegrees(vision.getTarget().getYaw()))); // Not sure if this will work, more math may be required.
-      }
-    });
+  public Command aimAtTarget(double tolerance)
+    {
+    SwerveController controller = swerveDrive.getSwerveController();
+    return run(
+        () -> {
+          drive(ChassisSpeeds.fromFieldRelativeSpeeds(0,
+                                                      0,
+                                                      controller.headingCalculate(getHeading().getRadians(),
+                                                                                  getTargetYaw().getRadians()),
+                                                      getHeading())
+               );
+        }).until(() -> getTargetYaw().minus(getHeading()).getDegrees() < tolerance);
   }
 
   /**

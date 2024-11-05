@@ -6,17 +6,13 @@ package frc.robot;
 
 import java.io.File;
 
-import org.photonvision.PhotonCamera;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
-import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.util.PixelFormat;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -26,7 +22,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.ArmSubsytem;
-import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 
@@ -34,7 +29,6 @@ public class RobotContainer {
   // Creates the subsystems
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
   private final IntakeSubsystem intakebase = new IntakeSubsystem();
-  private final ClimberSubsystem climbbase = new ClimberSubsystem();
   private final ArmSubsytem armbase = new ArmSubsytem();
 
   // Creates the auton sendable chooser
@@ -47,7 +41,7 @@ public class RobotContainer {
   CommandXboxController operatorXbox = new CommandXboxController(1);
 
   // Creates the photon camera
-  //PhotonCamera camera = new PhotonCamera("Camera");
+  //rPhotonCamera camera = new PhotonCamera("Camera");
 
   public RobotContainer() {
     configureBindings();
@@ -66,7 +60,7 @@ public class RobotContainer {
     autoChooser = AutoBuilder.buildAutoChooser(); // Builds auton sendable chooser for pathplanner.
     SmartDashboard.putData(autoChooser);  // Sends autoBuilder to smartdashboard.
 
-    CameraServer.startAutomaticCapture().setVideoMode(PixelFormat.kMJPEG, 480, 320, 10);
+    //CameraServer.startAutomaticCapture().setVideoMode(PixelFormat.kMJPEG, 480, 320, 10);
 
     // Creating the robot centric swerve drive
     Command closedDrive = drivebase.driveCommand(false, 
@@ -86,7 +80,7 @@ public class RobotContainer {
 
     drivebase.setDefaultCommand(fieldDrive); // Set default drive command to field centric drive
 
-    driverXbox.rightTrigger().whileTrue(drivebase.aimAtTarget());
+    driverXbox.rightTrigger().whileTrue(drivebase.aimAtTarget(2));
 
     // Driver Controls
     driverXbox.leftTrigger(.3).toggleOnTrue(closedDrive); // Toggle robot centric swerve drive
@@ -113,8 +107,8 @@ public class RobotContainer {
     //operatorXbox.leftBumper().whileTrue(intakebase.IntakeBackOut(.6));
     operatorXbox.x().whileTrue(intakebase.ShootCommand(.6, .5, .2)); // Spit the note into the amp
     operatorXbox.rightBumper().whileTrue(intakebase.ShootCommand(1, .7, .7));  // Shoot the note into the speaker
-    operatorXbox.start().whileTrue(climbbase.ClimbCommand(1)); // Spin the climb motor forwards.
-    operatorXbox.back().whileTrue(climbbase.ClimbCommand(-1)); // Spin the climb motor in reverse. 
+    //operatorXbox.start().whileTrue(climbbase.ClimbCommand(1)); // Spin the climb motor forwards.
+    //operatorXbox.back().whileTrue(climbbase.ClimbCommand(-1)); // Spin the climb motor in reverse. 
     operatorXbox.pov(0).whileTrue(armbase.MoveToSetpoint(6)); // Move the arm to setpoint // When held will oscillate around setpoint
   }
 
