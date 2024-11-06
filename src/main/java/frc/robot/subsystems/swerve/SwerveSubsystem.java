@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import org.photonvision.PhotonUtils;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathConstraints;
@@ -260,6 +262,32 @@ public class SwerveSubsystem extends SubsystemBase
                                                       getHeading())
                );
         }).until(() -> getTargetYaw().minus(getHeading()).getDegrees() < tolerance);
+  }
+
+  public Command goToNote() {
+    SwerveController controller = swerveDrive.getSwerveController();
+    return run(
+      () -> {
+        var result = vision.getLatestResult(Cameras.CENTER_CAM);
+
+        if (result.hasTargets()) {
+          double range = PhotonUtils.calculateDistanceToTargetMeters(
+          Units.inchesToMeters(18), // Camera Height
+          Units.inchesToMeters(1), // Target Height
+          Units.inchesToMeters(0), // Camera Pitch Radians
+          result.getBestTarget().getPitch());
+
+          Rotation2d targetYaw = new Rotation2d(result.getBestTarget().getYaw());
+
+          drive(ChassisSpeeds.fromFieldRelativeSpeeds(0,
+                                                      range,
+                                                      controller.headingCalculate(getHeading().getRadians(),
+                                                                                  targetYaw.getRadians()),
+                                                      getHeading()));
+        }
+
+      }
+    );
   }
 
   /**
