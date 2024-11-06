@@ -10,7 +10,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import org.photonvision.PhotonUtils;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathConstraints;
@@ -20,6 +19,7 @@ import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -73,6 +73,9 @@ public class SwerveSubsystem extends SubsystemBase
   private final boolean visionDriveTest = true;
 
   public double maxSpeed;
+
+  PIDController turnController = new PIDController(.1, 0, 0);
+  PIDController forwardController = new PIDController(.1, 0, 0);
 
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
@@ -263,32 +266,88 @@ public class SwerveSubsystem extends SubsystemBase
                );
         }).until(() -> getTargetYaw().minus(getHeading()).getDegrees() < tolerance);
   }
+  
 
-  public Command goToNote() {
-    SwerveController controller = swerveDrive.getSwerveController();
-    return run(
-      () -> {
-        var result = vision.getLatestResult(Cameras.CENTER_CAM);
+    public Command goToNote() {
+      SwerveController controller = swerveDrive.getSwerveController();
+      return run(
+        () -> {
+          var result = vision.getLatestResult(Cameras.CENTER_CAM);
 
-        if (result.hasTargets()) {
-          double range = PhotonUtils.calculateDistanceToTargetMeters(
-          Units.inchesToMeters(18), // Camera Height
-          Units.inchesToMeters(1), // Target Height
-          Units.inchesToMeters(0), // Camera Pitch Radians
-          result.getBestTarget().getPitch());
+          if (result.hasTargets()) {
+            double range = PhotonUtils.calculateDistanceToTargetMeters(
+            Units.inchesToMeters(18), // Camera Height
+            Units.inchesToMeters(1), // Target Height
+            Units.inchesToMeters(0), // Camera Pitch Radians
+            result.getBestTarget().getPitch());
 
-          Rotation2d targetYaw = new Rotation2d(result.getBestTarget().getYaw());
+            Rotation2d targetYaw = new Rotation2d(result.getBestTarget().getYaw());
 
-          drive(ChassisSpeeds.fromFieldRelativeSpeeds(0,
-                                                      range,
-                                                      controller.headingCalculate(getHeading().getRadians(),
-                                                                                  targetYaw.getRadians()),
-                                                      getHeading()));
+            drive(ChassisSpeeds.fromFieldRelativeSpeeds(0,
+                                                        range,
+                                                        controller.headingCalculate(getHeading().getRadians(),
+                                                                                    targetYaw.getRadians()),
+                                                        getHeading()));
+          }
+
         }
-
-      }
-    );
+      );
   }
+
+  public Command goToNotePID() {
+    SwerveController controller = swerveDrive.getSwerveController();
+      return run(
+        () -> {
+          var result = vision.getLatestResult(Cameras.CENTER_CAM);
+          double rotationSpeed;
+          double forwardSpeed;
+
+          if (result.hasTargets()) {
+            double range = PhotonUtils.calculateDistanceToTargetMeters(
+            Units.inchesToMeters(18), // Camera Height
+            Units.inchesToMeters(1), // Target Height
+            Units.inchesToMeters(0), // Camera Pitch Radians
+            result.getBestTarget().getPitch());
+
+            forwardSpeed = forwardController.calculate(range, 2);
+            rotationSpeed = turnController.calculate(result.getBestTarget().getYaw(), 0);
+
+            Rotation2d targetRotation = new Rotation2d(rotationSpeed);
+
+            drive(ChassisSpeeds.fromFieldRelativeSpeeds(forwardSpeed,
+                                                        0,
+                                                        controller.headingCalculate(getHeading().getRadians(),
+                                                                                    targetRotation.getRadians()),
+                                                                                    getHeading()));
+          }
+
+        }
+      );
+  }
+
+  public Command pathToNote() {
+    return run(
+        () -> {
+          var result = vision.getLatestResult(Cameras.CENTER_CAM);
+
+          if (result.hasTargets()) {
+
+            double targetYaw = result.getBestTarget().getYaw();
+
+            Translation2d range = new Translation2d(PhotonUtils.calculateDistanceToTargetMeters(
+            Units.inchesToMeters(18), // Camera Height
+            Units.inchesToMeters(1), // Target Height
+            Units.inchesToMeters(0), // Camera Pitch Radians
+            result.getBestTarget().getPitch()), targetYaw);
+
+            driveToPose(new Pose2d(range, new Rotation2d(targetYaw)));
+
+          }
+
+        }
+      );
+  }
+
 
   /**
    * Get the path follower with events.
