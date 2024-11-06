@@ -10,6 +10,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import org.photonvision.PhotonUtils;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathConstraints;
@@ -35,6 +36,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
@@ -324,6 +326,30 @@ public class SwerveSubsystem extends SubsystemBase
         }
       );
   }
+
+  public Command pathToNote()
+    {
+      return defer(() -> {
+
+        var result = vision.getLatestResult(Cameras.CENTER_CAM);
+
+        if (result.hasTargets())
+        {
+          double targetYaw = result.getBestTarget().getYaw();
+
+          Translation2d range = new Translation2d(PhotonUtils.calculateDistanceToTargetMeters(
+              Units.inchesToMeters(18), // Camera Height
+              Units.inchesToMeters(1), // Target Height
+              Units.inchesToMeters(0), // Camera Pitch Radians
+              result.getBestTarget().getPitch()), targetYaw);
+
+          Pose2d notePose = new Pose2d(range, new Rotation2d(targetYaw));
+          return driveToPose(notePose);
+
+        }
+        return new PrintCommand("No results found");
+      });
+    }
 
   /**
    * Get the path follower with events.
