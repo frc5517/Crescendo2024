@@ -325,30 +325,6 @@ public class SwerveSubsystem extends SubsystemBase
       );
   }
 
-  public Command pathToNote() {
-    return run(
-        () -> {
-          var result = vision.getLatestResult(Cameras.CENTER_CAM);
-
-          if (result.hasTargets()) {
-
-            double targetYaw = result.getBestTarget().getYaw();
-
-            Translation2d range = new Translation2d(PhotonUtils.calculateDistanceToTargetMeters(
-            Units.inchesToMeters(18), // Camera Height
-            Units.inchesToMeters(1), // Target Height
-            Units.inchesToMeters(0), // Camera Pitch Radians
-            result.getBestTarget().getPitch()), targetYaw);
-
-            driveToPose(new Pose2d(range, new Rotation2d(targetYaw)));
-
-          }
-
-        }
-      );
-  }
-
-
   /**
    * Get the path follower with events.
    *
